@@ -283,11 +283,13 @@ sysctl -w kernel.randomize_va_space=2
 
 # 1.5.4 Ensure prelink is disabled
 
-echo "[i] Restoring the prelink binaries to normal"
-prelink -ua
+# echo "[i] Restoring the prelink binaries to normal"
+# prelink -ua
 
-echo "[i] Uninstalling prelink"
-yum -y remove prelink
+# echo "[i] Uninstalling prelink"
+# yum -y remove prelink
+
+# prelink is not installed in Fedora
 
 #########################################################################################################################################
 
@@ -349,9 +351,11 @@ echo "user-db:user" > /etc/dconf/profile/gdm
 echo "system-db:gdm" >> /etc/dconf/profile/gdm
 echo "file-db:/usr/share/gdm/greeter-dconf-defaults" >> /etc/dconf/profile/gdm
 
+makedir /etc/dconf/db/gdm.d/
+
 echo "[org/gnome/login-screen]" > /etc/dconf/db/gdm.d/01-banner-message
 echo "banner-message-enable=true" >> /etc/dconf/db/gdm.d/01-banner-message
-echo "banner-message-text='Unauthorised use of this system is an offence under the Computer Misuse Act 1990. All activity may be monitored and reported." >> /etc/dconf/db/gdm.d/01-banner-message
+echo "banner-message-text='Unauthorised use of this system is an offence under the Computer Misuse Act 1990. All activity may be monitored and reported.'" >> /etc/dconf/db/gdm.d/01-banner-message
 
 dconf update
 
