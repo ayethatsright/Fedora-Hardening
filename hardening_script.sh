@@ -22,12 +22,11 @@ echo "[i] Beginning hardening process"
 
 echo "[i] Disabling the mounting of cramfs filesystems"
 
-if [ -f "/etc/modprobe.d/CIS.conf" ]
-	echo "install cramfs /bin/true" >> /etc/modprobe.d/CIS.conf
+if [ -f "/etc/modprobe.d/CIS.conf" ]; then
+    echo "install cramfs /bin/true" >> /etc/modprobe.d/CIS.conf
 else
-	echo "install cramfs /bin/true" > /etc/modprobe.d/CIS.conf
-
-rmmod cramfs
+    echo "install cramfs /bin/true" > /etc/modprobe.d/CIS.conf
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -37,8 +36,6 @@ echo "[i] Disabling the mounting of freevxfs filesystems"
 
 echo "install freevxfs /bin/true" >> /etc/modprobe.d/CIS.conf
 
-rmmod freevxfs
-
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.1.1.3 Ensure mounting of jffs2 filesystems is disabled
@@ -46,9 +43,6 @@ rmmod freevxfs
 echo "[i] Disabling the mounting of jffs2 filesystems"
 
 echo "install jffs2 /bin/true" >> /etc/modprobe.d/CIS.conf
-
-rmmod jffs2
-
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.1.1.4 Ensure mounting of hfs filesystems is disabled
@@ -56,8 +50,6 @@ rmmod jffs2
 echo "[i] Disabling the mounting of hfs filesystems"
 
 echo "install hfs /bin/true" >> /etc/modprobe.d/CIS.conf
-
-rmmod hfs
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -67,8 +59,6 @@ echo "[i] Disabling the mounting of hfsplus filesystems"
 
 echo "install hfsplus /bin/true" >> /etc/modprobe.d/CIS.conf
 
-rmmod hfsplus
-
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.1.1.6 Ensure mounting of squashfs filesystems is disabled
@@ -76,8 +66,6 @@ rmmod hfsplus
 echo "[i] Disabling the mounting of squashfs filesystems"
 
 echo "install squashfs /bin/true" >> /etc/modprobe.d/CIS.conf
-
-rmmod squashfs
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -87,14 +75,11 @@ echo "[i] Disabling the mounting of udf filesystems"
 
 echo "install udf /bin/true" >> /etc/modprobe.d/CIS.conf
 
-rmmod udf
-
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.1.1.8 Ensure mounting of FAT filesystems is disabled
 # echo "[i] Disabling the mounting of FAT filesystems"
 # echo "install vfat /bin/true" >> /etc/modprobe.d/CIS.conf
-# rmmod vfat
 
 # This has been disabled as there is a need to use portable USB drives which are often FAT formatted.
 
@@ -104,14 +89,17 @@ rmmod udf
 # 1.1.4 Ensure nosuid option set on /tmp partition
 # 1.1.5 Ensure noexec option set on /tmp partition
 
-echo "[i] Setting nodev, nosuid and noexec options on the /tmp partition"
+# This cannot currently be deployed as there is a known bug in RHEL 8 (https://bugzilla.redhat.com/show_bug.cgi?id=1667065)
+# Isn't the end of the world though as the nodev, noexec and nosuid options should be set by default
 
-systemctl unmask tmp.mount
-systemctl enable tmp.mount
+#echo "[i] Setting nodev, nosuid and noexec options on the /tmp partition"
 
-sed -i -e 's/\(Options=\).*/\1mode=1777,strictatime,noexec,nodev,nosuid/' /etc/systemd/system/local-fs.target.wants/tmp.mount
+#systemctl unmask tmp.mount
+#systemctl enable tmp.mount
 
-mount -o remount,nodev,nosuid,noexec /tmp
+#sed -i -e 's/\(Options=\).*/\1mode=1777,strictatime,noexec,nodev,nosuid/' /etc/systemd/system/local-fs.target.wants/tmp.mount
+
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -124,8 +112,6 @@ echo "[i] Setting nodev, nosuid and noexec options on the /var/tmp partition"
 LINEVARTMP="tmpfs /var/tmp tmpfs nosuid,noexec,nodev 0 0"
 
 grep -F "$LINEVARTMP" /etc/fstab || echo "$LINEVARTMP" | tee -a /etc/fstab > /dev/null
-
-mount -o remount,nodev,nosuid,noexec /var/tmp
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -173,7 +159,7 @@ df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -typ
 
 echo "[i] Globally activating gpgcheck"
 
-sed -i 's/gpgcheck=0/gpgcheck=1/' /etc/yum.conf
+echo "gpgcheck=1" > /etc/yum.conf
 
 #########################################################################################################################################
 
@@ -225,19 +211,16 @@ crontab -u root $AIDECRONFILE
 
 rm $AIDECRONFILE
 
-fi
-
 #########################################################################################################################################
 
 # 1.4.1 Ensure permissions on bootloader config are configured
 
-
 echo "[i] Setting correct permissions for the bootloader config"
 
-chown root:root /boot/grub2/grub.cfg
-chmod og-rwx /boot/grub2/grub.cfg
-chown root:root /boot/grub2/user.cfg
-chmod og-rwx /boot/grub2/user.cfg
+chown root:root /boot/efi/EFI/fedora/grub.cfg
+chmod og-rwx /boot/efi/EFI/fedora/grub.cfg
+chown root:root /boot/efi/EFI/fedora/user.cfg
+chmod og-rwx /boot/efi/EFI/fedora/user.cfg
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
