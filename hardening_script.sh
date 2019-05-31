@@ -1193,7 +1193,7 @@ fi
 
 echo "[i] Installing the Privileged Access Management Password Quality module"
 
-apt install -y libpam-pwquality
+yum install -y libpam-pwquality
 
 echo "[i] Setting password policies to align with CIS guidance"
 echo "[i] If you have different password policy requirements, you will need to set these yourself"
@@ -1397,8 +1397,8 @@ chmod 644 /etc/passwd
 
 echo "[i] Setting correct permissions on /etc/shadow"
 
-chown root:shadow /etc/shadow
-chmod o-rwx,g-wx /etc/shadow
+chown root:root /etc/shadow
+chmod 000 /etc/shadow
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -1415,8 +1415,8 @@ chmod 644 /etc/group
 
 echo "[i] Setting correct permissions on /etc/gshadow"
 
-chown root:shadow /etc/gshadow
-chmod o-rwx,g-rw /etc/gshadow
+chown root:root /etc/gshadow
+chmod 000 /etc/gshadow
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -1433,8 +1433,8 @@ chmod u-x,go-wx /etc/passwd-
 
 echo "[i] Setting correct permissions on /etc/shadow-"
 
-chown root:shadow /etc/shadow-
-chmod o-rwx,g-rw /etc/shadow-
+chown root:root /etc/shadow-
+chmod 000 /etc/shadow-
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -1451,13 +1451,35 @@ chmod u-x,go-wx /etc/group-
 
 echo "[i] Setting correct permissions on /etc/gshadow-"
 
-chown root:shadow /etc/gshadow-
-chmod o-rwx,g-rw /etc/gshadow-
+chown root:root /etc/gshadow-
+chmod 000 /etc/gshadow-
 
 #########################################################################################################################################
 
 # 6.1.10 Ensure no world writable files 
+# 6.1.11 Ensure no unowned files or directories exist
+# 6.1.12 Ensure no ungrouped files or directories exist 
+# 6.2.1 Ensure password fields are not empty
+# 6.2.2 Ensure no legacy "+" entries exist in /etc/passwd
+# 6.2.3 Ensure no legacy "+" entries exist in /etc/shadow
+# 6.2.4 Ensure no legacy "+" entries exist in /etc/group
+# 6.2.5 Ensure root is the only UID 0 account
+# 6.2.6 Ensure root PATH integrity
+# 6.2.7 Ensure all users' home directories exist
+# 6.2.8 Ensure all users' home directories permissions are 750 or more restrictive
+# 6.2.9 Ensure users own their home directories
+# 6.2.10 Ensure users' dot files are not group or world writable
+# 6.2.11 Ensure no users have .forward files
+# 6.2.12 Ensure no users have .netrc files
+# 6.2.13 Ensure users' .netrc Files are not group or world accessible
+# 6.2.14 Ensure no users have .rhosts files
+# 6.2.15 Ensure all groups in /etc/passwd exist in /etc/group
+# 6.2.16 Ensure no duplicate UIDs exist
+# 6.2.17 Ensure no duplicate GIDs exist
+# 6.2.18 Ensure no duplicate user names exist
+# 6.2.19 Ensure no duplicate group names exist
 
+# The above are all audit tasks which don't need to be done during initial setup (because none of them are there by default)
 
 
 #########################################################################################################################################
