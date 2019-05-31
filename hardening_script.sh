@@ -234,18 +234,17 @@ chmod og-rwx /boot/efi/EFI/fedora/grub.cfg
 
 echo "[i] Configuring 'single user mode' to require authentication"
 
-
 if grep -q "ExecStart=" /usr/lib/systemd/system/rescue.service; then 
 	sed -i 's/^ExecStart=.*/ExecStart=-\/bin\/sh -c "\/sbin\/sulogin; \/usr\/bin\/systemctl --fail --no-block default"/' /usr/lib/systemd/system/rescue.service
 else
-    echo "ExecStart=-/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"" >> /usr/lib/systemd/system/rescue.service
+    echo "ExecStart=-/bin/sh -c \"/sbin/sulogin; /usr/bin/systemctl --fail --no-block default\"" >> /usr/lib/systemd/system/rescue.service
 fi
 
 
 if grep -q "ExecStart=" /usr/lib/systemd/system/emergency.service; then 
-	sed -i 's/^ExecStart=.*/ExecStart=-/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"/' /usr/lib/systemd/system/emergency.service
+	sed -i 's/^ExecStart=.*/ExecStart=-\/bin\/sh -c "\/sbin\/sulogin; \/usr\/bin\/systemctl --fail --no-block default"/' /usr/lib/systemd/system/emergency.service
 else
-    echo "ExecStart=-/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"" >> /usr/lib/systemd/system/emergency.service
+    echo "ExecStart=-/bin/sh -c \"/sbin/sulogin; /usr/bin/systemctl --fail --no-block default\"" >> /usr/lib/systemd/system/emergency.service
 fi
 
 #########################################################################################################################################
