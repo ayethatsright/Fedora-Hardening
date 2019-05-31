@@ -226,9 +226,12 @@ chmod og-rwx /boot/efi/EFI/fedora/user.cfg
 
 # 1.4.2 Ensure bootloader password is set
 
-echo "[i] Setting bootloader password"
+# echo "[i] Setting bootloader password"
 
-grub2-setpassword
+# grub2-setpassword
+
+# This isn't required as LUKS is configured for full disk encryption during the anaconda installation so a boot 
+# passphrase is already needed to decrypt the disk and boot the OS
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
