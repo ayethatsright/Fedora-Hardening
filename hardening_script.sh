@@ -20,6 +20,8 @@ echo "[i] Beginning hardening process"
 
 # Updating system
 
+echo "[i] Updating the OS"
+
 yum -y upgrade
 
 #########################################################################################################################################
@@ -364,12 +366,6 @@ dconf update
 # None of these are needed because Fedora doesn't come with the inetd services installed
 
 # 1.8.1 Ensure updates, patches, and additional security software are installed
-
-# echo "[i] Patching, updating and applying security fixes"
-
-# yum -y update --security
-
-#########################################################################################################################################
 
 # 2.1.1 Ensure chargen services are not enabled
 
