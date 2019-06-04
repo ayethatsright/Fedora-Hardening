@@ -96,7 +96,7 @@ fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-# 1.1.1.3 Ensure mounting of jffs2 filesystems is disabled"
+# 1.1.1.3 Ensure mounting of jffs2 filesystems is disabled
 
 echo "############################################################################" >> ./audit_results.txt
 
@@ -270,9 +270,6 @@ echo "1.1.1.8 Ensure mounting of FAT filesystems is disabled"
 
 # This control isn't being applied as part of the hardening so an audit isn't necessary.
 
-echo "############################################################################" >> ./audit_results.txt
-echo "[i] 1.1.1.8 - This control isn't applied as part of the hardening - No action necessary"
-
 #echo "[i] Confirming that vfat filesystems are disabled from mounting" | tee -a ./audit_results.txt
 #echo "[i] Output from the 'modprobe -n -v vfat' command is: " | tee -a ./audit_results.txt
 
@@ -313,6 +310,7 @@ echo "[i] 1.1.1.8 - This control isn't applied as part of the hardening - No act
 echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming that nodev, nosuid and noexec options are set on the /tmp partition" | tee -a ./audit_results.txt
+echo "[i] Output of the 'mount | grep /tmp' command is: " | tee -a ./audit_results.txt
 
 mount | grep /tmp | tee -a ./audit_results.txt
 
@@ -321,21 +319,21 @@ echo "[!!!] The output above should include 'nosuid, nodev, noexec'.  If not, th
 var=$(mount | grep /tmp)
 
 if [[ $var == *"nosuid"* ]]; then
-	echo "[YES] nosuid appears to be set"
+	echo "[YES] nosuid appears to be set" | tee -a ./audit_results.txt
 else
-	echo "[NO] nosuid doesn't appear to be set"
+	echo "[NO] nosuid doesn't appear to be set" | tee -a ./audit_results.txt
 fi
 
 if [[ $var == *"nodev"* ]]; then
-	echo "[YES] nodev appears to be set"
+	echo "[YES] nodev appears to be set" | tee -a ./audit_results.txt
 else
-	echo "[NO] nodev doesn't appear to be set"
+	echo "[NO] nodev doesn't appear to be set" | tee -a ./audit_results.txt
 fi
 
 if [[ $var == *"noexec"* ]]; then
-	echo "[YES] noexec appears to be set"
+	echo "[YES] noexec appears to be set" | tee -a ./audit_results.txt
 else
-	echo "[NO] noexec doesn't appear to be set"
+	echo "[NO] noexec doesn't appear to be set" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
@@ -347,15 +345,30 @@ fi
 echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming that nodev, nosuid and noexec options are set on the /var/tmp partition" | tee -a ./audit_results.txt
+echo "[i] Output of the 'mount | grep /tmp' command is: " | tee -a ./audit_results.txt
 
 mount | grep /var/tmp | tee -a ./audit_results.txt
 
 echo "[!!!] The output above should include 'nosuid, nodev, noexec'.  If not, the control isn't applied" | tee -a ./audit_results.txt
 
-if mount | grep /var/tmp | grep -q 'tmpfs on /var/tmp type tmpfs (rw,nosuid,nodev,noexec,relatime)'; then
-	echo "[YES] The control is applied correctly" | tee -a ./audit_results.txt
+var=$(mount | grep /var/tmp)
+
+if [[ $var == *"nosuid"* ]]; then
+	echo "[YES] nosuid appears to be set" | tee -a ./audit_results.txt
 else
-	echo "[NO] The control doesn't appear to be applied correctly" | tee -a ./audit_results.txt
+	echo "[NO] nosuid doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if [[ $var == *"nodev"* ]]; then
+	echo "[YES] nodev appears to be set" | tee -a ./audit_results.txt
+else
+	echo "[NO] nodev doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if [[ $var == *"noexec"* ]]; then
+	echo "[YES] noexec appears to be set" | tee -a ./audit_results.txt
+else
+	echo "[NO] noexec doesn't appear to be set" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
@@ -365,10 +378,19 @@ fi
 echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming that nodev is set on the /home partition" | tee -a ./audit_results.txt
+echo "[i] Output of the 'mount | grep /home' command is: "
 
 mount | grep /home | tee -a ./audit_results.txt
 
 echo "[!!!] The output above should include 'nodev'.  If not, the control isn't applied" | tee -a ./audit_results.txt
+
+var=$(mount | grep /home)
+
+if [[ $var == *"nodev"* ]]; then
+	echo "[YES] nodev appears to be set" | tee -a ./audit_results.txt
+else
+	echo "[NO] nodev doesn't appear to be set" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -379,15 +401,30 @@ echo "[!!!] The output above should include 'nodev'.  If not, the control isn't 
 echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming that nodev, nosuid and noexec options are set on the /dev/shm partition" | tee -a ./audit_results.txt
+echo "[i] Output of the 'mount | grep /dev/shm' command is: " | tee -a ./audit_results.txt
 
 mount | grep /dev/shm | tee -a ./audit_results.txt
 
 echo "[!!!] The output above should include 'nosuid, nodev, noexec'.  If not, the control isn't applied" | tee -a ./audit_results.txt
 
-if mount | grep /dev/shm | grep -q 'tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev,noexec,relatime)'; then
-	echo "[YES] The control is applied correctly" | tee -a ./audit_results.txt
+var=$(mount | grep /dev/shm)
+
+if [[ $var == *"nosuid"* ]]; then
+	echo "[YES] nosuid appears to be set" | tee -a ./audit_results.txt
 else
-	echo "[NO] The control doesn't appear to be applied correctly" | tee -a ./audit_results.txt
+	echo "[NO] nosuid doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if [[ $var == *"nodev"* ]]; then
+	echo "[YES] nodev appears to be set" | tee -a ./audit_results.txt
+else
+	echo "[NO] nodev doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if [[ $var == *"noexec"* ]]; then
+	echo "[YES] noexec appears to be set" | tee -a ./audit_results.txt
+else
+	echo "[NO] noexec doesn't appear to be set" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
@@ -397,108 +434,173 @@ fi
 echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming that sticky bit is set on all world-writable directories" | tee -a ./audit_results.txt
+echo "[i] Output of the audit command is: " | tee -a ./audit_results.txt
 
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | tee -a ./audit_results.txt
 
+echo "[i] The output of the above command should be blank if the sticky bit is set correctly" | tee -a ./audit_results.txt
 
+var=$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null)
 
-
-
-
-
-
-
-
-
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore the control is applied" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore the control is NOT applied" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 1.2.2 Ensure gpgcheck is globally activated
 
-echo "[i] Globally activating gpgcheck"
+echo "############################################################################" >> ./audit_results.txt
 
-echo "gpgcheck=1" > /etc/yum.conf
+echo "[i] Confirming that sticky bit is set on all world-writable directories" | tee -a ./audit_results.txt
+echo "[i] Output of the gpgcheck command is: " | tee -a ./audit_results.txt
+
+grep ^gpgcheck /etc/yum.conf | tee -a ./audit_results.txt
+
+echo "[i] The above output must have 'gpgcheck=1' if the control is implemented correctly" | tee -a ./audit_results.txt
+
+var=$(grep ^gpgcheck /etc/yum.conf)
+
+if [[ "$var" == "gpgcheck=1" ]]; then
+	echo "[YES] Control is set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The control doesn't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 1.3.1 Ensure AIDE is installed
 
-echo "[i] Installing, configuring and initialising AIDE (the file integrity checking tool)"
+echo "############################################################################" >> ./audit_results.txt
 
-# Installing AIDE:
-yum -y install aide 
+echo "[i] Confirming AIDE is installed" | tee -a ./audit_results.txt
+echo "[i] Output of the 'rpm -q aide' command is: " | tee -a ./audit_results.txt
 
-# Inistialising AIDE
-aide --init
-mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+rpm -q aide | tee -a ./audit_results.txt
 
-# Due to a bug in Red Hat there will be some errors reported that 'algorithm 7 not available'
+echo "[i] Output from the above command must be 'aide-<version>' to confirm that AIDE is installed" | tee -a ./audit_results.txt
+
+var=$(rpm -q aide)
+
+if [[ $var == *"aide-"* ]]; then
+	echo "[YES] AIDE appears to be installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] AIDE doesn't appear to be installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.3.2 Ensure filesystem integrity is regularly checked
 
-echo "[i] Creating a cron job to regularly check filesystem integrity using AIDE"
+echo "############################################################################" >> ./audit_results.txt
 
-LINEAIDECRON="0 5 * * * /usr/bin/aide.wrapper --config /etc/aide/aide.conf --check"
-AIDECRONFILE=/home/tmp.cron
+echo "[i] Confirming AIDE is regularly checked" | tee -a ./audit_results.txt
+echo "[i] Output of the 'crontab -u' command is: " | tee -a ./audit_results.txt
 
-crontab -l -u root 2>/dev/null
+crontab - u root -l | grep aide | tee -a ./audit_results.txt
 
-if [ $? -eq 0 ]
-then
-    crontab -u root -l > $AIDECRONFILE
-else
-    touch $AIDECRONFILE
-fi
+echo "[i] NEED TO KNOW WHAT THE OUTPUT FROM THIS IS AND THEN ADD AN IF STATEMENT TO CHECK IF ITS CORRECT"
 
-grep -qF "$LINEAIDECRON" "$AIDECRONFILE" || echo "$LINEAIDECRON" | tee -a "$AIDECRONFILE" > /dev/null
+grep -r aide /etc/cron.* /etc/crontab | tee -a ./audit_results.txt
 
-crontab -u root $AIDECRONFILE
+echo "[i] NEED TO KNOW WHAT THE OUTPUT FROM THIS IS AND THEN ADD AN IF STATEMENT TO CHECK IF ITS CORRECT"
 
-rm $AIDECRONFILE
+# NEEDS COMPLETING
 
 #########################################################################################################################################
 
 # 1.4.1 Ensure permissions on bootloader config are configured
 
-echo "[i] Setting correct permissions for the bootloader config"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /boot/efi/EFI/fedora/grub.cfg
-chmod og-rwx /boot/efi/EFI/fedora/grub.cfg
-# chown root:root /boot/efi/EFI/fedora/user.cfg
-# chmod og-rwx /boot/efi/EFI/fedora/user.cfg
+echo "[i] Confirming permissions are set correctly on the bootloader config" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /boot/efi/EFI/fedora/grub.cfg | tee -a ./audit_results.txt
+
+echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' does not grant permissions to 'group' or 'other'"
+
+var=$(stat /boot/efi/EFI/fedora/grub.cfg)
+
+if [[ "$var" == "Access: (0600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] Bootloader permissions appear to be set correctly"
+else
+	echo "[NO] Bootloader permissions do NOT appear to be set correctly"
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.4.2 Ensure bootloader password is set
 
-# echo "[i] Setting bootloader password"
+echo "[i] Confirming the bootloader password is set: " | tee -a ./audit-results.txt
+echo "[i] Output of the grep command against the 'grub.cfg' file is: " | tee -a ./audit-results.txt
 
-# grub2-setpassword
+grep "^GRUB2_PASSWORD" /boot/efi/EFI/fedora/grub.cfg | tee -a ./audit-results.txt
 
-# This isn't required as LUKS is configured for full disk encryption during the anaconda installation so a boot 
-# passphrase is already needed to decrypt the disk and boot the OS
+echo "[i] The above output should be 'GRUB2_PASSWORD=<encrypted-password>" | tee -a ./audit_results.txt
+
+var=$(grep "^GRUB2_PASSWORD" /boot/efi/EFI/fedora/grub.cfg)
+
+if [[ $var == *"GRUB2_PASSWORD="* ]]; then
+	echo "[YES] Bootloader password appears to be set" | tee -a ./audit_results.txt
+else
+	echo "[NO] Bootloader password doesn't appear to be set" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.4.3 Ensure authentication required for single user mode
 
-echo "[i] Configuring 'single user mode' to require authentication"
+echo "[i] Confirming that 'single user mode' requires authentication" | tee -a ./audit_results.txt
+echo "[i] Checking that '/sbin/sulogin' is set within 'rescue.service': " | tee -a ./audit_results.txt
 
-if grep -q "ExecStart=" /usr/lib/systemd/system/rescue.service; then 
-	sed -i 's/^ExecStart=.*/ExecStart=-\/bin\/sh -c "\/sbin\/sulogin; \/usr\/bin\/systemctl --fail --no-block default"/' /usr/lib/systemd/system/rescue.service
+grep /sbin/sulogin /usr/lib/systemd/system/rescue.service | tee -a ./audit_results.txt
+
+echo "[i] the above output must include /sbin/sulogin otherwise the control isn't set" | tee -a ./audit_results.txt
+
+var=$(grep /sbin/sulogin /usr/lib/systemd/system/rescue.service)
+
+if [[ "$var" == "ExecStart=-/bin/sh -c \"/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"; then
+	echo "[YES] /sbin/sulogin appears to be set within 'rescue.service'" | tee -a ./audit_results.txt
 else
-    echo "ExecStart=-/bin/sh -c \"/sbin/sulogin; /usr/bin/systemctl --fail --no-block default\"" >> /usr/lib/systemd/system/rescue.service
+	echo "[NO] /sbin/sulogin appears NOT to be set within 'rescue.service'" | tee -a ./audit_results.txt
 fi
 
+echo "[i] STILL confirming that 'single user mode' requires authentication" | tee -a ./audit_results.txt
+echo "[i] Checking that '/sbin/sulogin' is set within 'emergency.service': " | tee -a ./audit_results.txt
 
-if grep -q "ExecStart=" /usr/lib/systemd/system/emergency.service; then 
-	sed -i 's/^ExecStart=.*/ExecStart=-\/bin\/sh -c "\/sbin\/sulogin; \/usr\/bin\/systemctl --fail --no-block default"/' /usr/lib/systemd/system/emergency.service
+grep /sbin/sulogin /usr/lib/systemd/system/emergency.service | tee -a ./audit_results.txt
+
+echo "[i] the above output must include /sbin/sulogin otherwise the control isn't set" | tee -a ./audit_results.txt
+
+var=$(grep /sbin/sulogin /usr/lib/systemd/system/emergency.service)
+
+if [[ "$var" == "ExecStart=-/bin/sh -c \"/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"; then
+	echo "[YES] /sbin/sulogin appears to be set within 'emergency.service'" | tee -a ./audit_results.txt
 else
-    echo "ExecStart=-/bin/sh -c \"/sbin/sulogin; /usr/bin/systemctl --fail --no-block default\"" >> /usr/lib/systemd/system/emergency.service
+	echo "[NO] /sbin/sulogin appears NOT to be set within 'emergency.service'" | tee -a ./audit_results.txt
 fi
 
 #########################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+above has been completed (but not tested)***************************
+continue from here *************************************************
+
+
 
 # 1.5.1 Ensure core dumps are restricted
 
