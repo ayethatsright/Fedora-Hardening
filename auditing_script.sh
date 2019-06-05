@@ -520,19 +520,21 @@ echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
 
 stat /boot/efi/EFI/fedora/grub.cfg | tee -a ./audit_results.txt
 
-echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' does not grant permissions to 'group' or 'other'"
+echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' does not grant permissions to 'group' or 'other'" | tee -a ./audit_results.txt
 
 var=$(stat /boot/efi/EFI/fedora/grub.cfg)
 
 if [[ "$var" == "Access: (0600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
-	echo "[YES] Bootloader permissions appear to be set correctly"
+	echo "[YES] Bootloader permissions appear to be set correctly" | tee -a ./audit_results.txt
 else
-	echo "[NO] Bootloader permissions do NOT appear to be set correctly"
+	echo "[NO] Bootloader permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.4.2 Ensure bootloader password is set
+
+echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming the bootloader password is set: " | tee -a ./audit-results.txt
 echo "[i] Output of the grep command against the 'grub.cfg' file is: " | tee -a ./audit-results.txt
@@ -552,6 +554,8 @@ fi
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.4.3 Ensure authentication required for single user mode
+
+echo "############################################################################" >> ./audit_results.txt
 
 echo "[i] Confirming that 'single user mode' requires authentication" | tee -a ./audit_results.txt
 echo "[i] Checking that '/sbin/sulogin' is set within 'rescue.service': " | tee -a ./audit_results.txt
@@ -585,230 +589,402 @@ fi
 
 #########################################################################################################################################
 
-
-
-
-
-
-
-
-
-
-
-
-
-above has been completed (but not tested)***************************
-continue from here *************************************************
-
-
-
 # 1.5.1 Ensure core dumps are restricted
 
-echo "[i] Ensuring core dumps are restricted"
+echo "############################################################################" >> ./audit_results.txt
 
-DUMPLINE="* hard core 0"
-DUMPFILE=/etc/security/limits.conf
+echo "[i] Confirming that core dumps are restricted" | tee -a ./audit_results.txt
+echo "[i] Running grep command to get info from /etc/security/limits.conf: " | tee -a ./audit_results.txt
 
-grep -qF "$DUMPLINE" "$DUMPFILE" || echo "$DUMPLINE" | tee -a "$DUMPFILE" > /dev/null
+grep "hard core" /etc/security/limits.conf | tee -a ./audit_results.txt
 
-DUMPABLELINE="fs.suid_dumpable=0"
-DUMPABLEFILE=/etc/sysctl.conf
+echo "Output from above command should be '* hard core 0' if the control is applied correctly" | tee -a ./audit_results.txt
 
-grep -qF "$DUMPABLELINE" "$DUMPABLEFILE" || echo "$DUMPABLELINE" | tee -a "$DUMPABLEFILE" > /dev/null
+var=$(grep "hard core" /etc/security/limits.conf)
 
-sysctl -w fs.suid_dumpable=0
+if [[ "$var" == "* hard core 0" ]]; then
+	echo "[YES] The control appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The control doesn't appear to be set correctly" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Running sysctl command to get info from fs.suid_dumpable: " | tee -a ./audit_results.txt
+
+sysctl fs.suid_dumpable | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should be 'fs.suid_dumpable = 0' if the control is set correctly" | tee -a ./audit_results.txt
+
+var=$(sysctl fs.suid_dumpable)
+
+if [[ "$var" == "fs.suid_dumpable = 0" ]]; then
+	echo "[YES] The control appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The control doesn't appear to be set correctly" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Running grep command to get info from /etc/sysctl.conf: " | tee -a ./audit_results.txt
+
+grep "fs\.suid_dumpable" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'fs.suid_dumpable = 0' if the control is applied correctly" | tee -a ./audit_results.txt
+
+var=$(grep "hard core" /etc/security/limits.conf)
+
+if [[ "$var" == "fs.suid_dumpable = 0" ]]; then
+	echo "[YES] The control appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The control doesn't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.5.3 Ensure address space layout randomization (ASLR) is enabled
 
-echo "[i] Enabling address space layout randomization (ASLR)"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^kernel.randomize_va_space" /etc/sysctl.conf; then 
-	sed -i 's/^kernel.randomize_va_space.*/kernel.randomize_va_space = 2/' /etc/sysctl.conf
+echo "[i] Confirming that address space layout randomisation (ASLR) is enabled" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get info from kernel.randomize_va_space: " | tee -a ./audit_results.txt
+
+sysctl kernel.randomize_va_space | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'kernel.randomize_va_space = 2' if the control is applied correctly" | tee -a ./audit_results.txt
+
+var=$(sysctl kernel.randomize_va_space)
+
+if [[ "$var" == "kernel.randomize_va_space = 2" ]]; then
+	echo "[YES] The control appears to be set correctly" | tee -a ./audit_results.txt
 else
-    echo "kernel.randomize_va_space = 2" >> /etc/sysctl.conf
+	echo "[NO] The control doesn't appear to be set correctly" | tee -a ./audit_results.txt
 fi
 
-sysctl -w kernel.randomize_va_space=2
+echo "[i] Running grep command to get info from /etc/sysctl.conf: " | tee -a ./audit_results.txt
+
+grep "kernel\.randomize_va_space" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should be 'kernel.randomize_va_space = 2' if the control is set correctly" | tee -a ./audit_results.txt
+
+var=$(grep "kernel\.randomize_va_space" /etc/sysctl.conf)
+
+if [[ "$var" == "kernel.randomize_va_space = 2" ]]; then
+	echo "[YES] The control appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The control doesn't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.5.4 Ensure prelink is disabled
 
-# echo "[i] Restoring the prelink binaries to normal"
-# prelink -ua
+echo "############################################################################" >> ./audit_results.txt
 
-# echo "[i] Uninstalling prelink"
-# yum -y remove prelink
+echo "[i] Confirming that prelink isn't installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm to get prelink package info: " | tee -a ./audit_results.txt
 
-# prelink is not installed in Fedora
+rpm -q prelink
+
+echo "Output from above command should be 'package prelink is not installed'" | tee -a ./audit_results.txt
+
+var=$(rpm -q prelink)
+
+if [[ "$var" == "package prelink is not installed" ]]; then
+	echo "[YES] prelink is not installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] prelink IS installed" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 1.7.1.1 Ensure message of the day is configured properly
-
-echo "[i] Creating the message of the day"
-
-echo "Unauthorised use of this system is an offence under the Computer Misuse Act 1990. All activity may be monitored and reported." > /etc/motd
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 1.7.1.2 Ensure local login warning banner is configured properly
-
-echo "[i] Creating the local login warning banner"
-
-echo "Unauthorised use of this system is an offence under the Computer Misuse Act 1990. All activity may be monitored and reported." > /etc/issue
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 1.7.1.3 Ensure remote login warning banner is configured properly
 
-echo "[i] Creating the remote login warning banner"
+echo "############################################################################" >> ./audit_results.txt
 
-echo "Unauthorised use of this system is an offence under the Computer Misuse Act 1990. All activity may be monitored and reported." > /etc/issue.net
+echo "[i] Confirming that message of the day, local login warning banner & the remote login warning banner are set" | tee -a ./audit_results.txt
+echo "[i] Getting the message of the day: " | tee -a ./audit_results.txt
+
+cat /etc/motd | tee -a ./audit_results.txt
+
+echo "[i] Manually confirm the above output matches required policy" | tee -a ./audit_results.txt
+
+echo "[i] Getting the local login warning banner: " | tee -a ./audit_results.txt
+
+cat /etc/issue | tee -a ./audit_results.txt
+
+echo "[i] Manually confirm the above output and ensure it matches required policy" | tee -a ./audit_results.txt
+
+echo "[i] Getting the remote login warning banner: " | tee -a ./audit_results.txt
+
+cat /etc/issue.net | tee -a ./audit_results.txt
+
+echo "[i] Manually confirm the above output and ensure it matches required policy" | tee -a ./audit_results.txt
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.7.1.4 Ensure permissions on /etc/motd are configured
-
-echo "[i] Setting correct permissions on /etc/motd"
-
-chown root:root /etc/motd
-chmod 644 /etc/motd
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 1.7.1.5 Ensure permissions on /etc/issue are configured
 
-echo "[i] Setting correct permissions on /etc/issue"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/issue
-chmod 644 /etc/issue
+echo "[i] Confirming permissions are set correctly on /etc/motd" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
 
-#---------------------------------------------------------------------------------------------------------------------------------------#
+stat /etc/motd | tee -a ./audit_results.txt
 
-# 1.7.1.6 Ensure permissions on /etc/issue.net are configured
+echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' should be permissioned as 644'" | tee -a ./audit_results.txt
 
-echo "[i] Setting correct permissions on /etc/issue.net"
-chown root:root /etc/issue.net
-chmod 644 /etc/issue.net
+var=$(stat /etc/motd)
+
+if [[ "$var" == "Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/motd permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/motd permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming permissions are set correctly on /etc/issue" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/issue | tee -a ./audit_results.txt 
+
+echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' should be permissioned as 644'" | tee -a ./audit_results.txt
+
+var=$(stat /etc/motd)
+
+if [[ "$var" == "Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/motd permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/motd permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 1.7.2 Ensure GDM login banner is configured
 
-echo "[i] Setting the GDM login banner"
+echo "############################################################################" >> ./audit_results.txt
 
-echo "user-db:user" > /etc/dconf/profile/gdm
-echo "system-db:gdm" >> /etc/dconf/profile/gdm
-echo "file-db:/usr/share/gdm/greeter-dconf-defaults" >> /etc/dconf/profile/gdm
+echo "[i] Confirming GDM login banner is configured" | tee -a ./audit_results.txt
+echo "[i] Reviewing the /etc/dconf/profile/gdm file: " | tee -a ./audit_results.txt
 
-makedir /etc/dconf/db/gdm.d/
+cat /etc/dconf/profile/gdm | tee -a ./audit_results.txt
 
-echo "[org/gnome/login-screen]" > /etc/dconf/db/gdm.d/01-banner-message
-echo "banner-message-enable=true" >> /etc/dconf/db/gdm.d/01-banner-message
-echo "banner-message-text='Unauthorised use of this system is an offence under the Computer Misuse Act 1990. All activity may be monitored and reported.'" >> /etc/dconf/db/gdm.d/01-banner-message
+echo "[i] The above output must include 'user-db:user', 'system-db:gdm' & 'file-db:/usr/share/ddm/greeter-dconf-defaults'" | tee -a ./audit_results.txt
 
-dconf update
+if cat /etc/dconf/profile/gdm | grep -q 'user-db:user'; then
+	echo "[YES] 'user-db:user' appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] 'user-db:user' doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if cat /etc/dconf/profile/gdm | grep -q 'system-db:gdm'; then
+	echo "[YES] 'system-db:gdm' appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] 'system-db:gdm' doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if cat /etc/dconf/profile/gdm | grep -q 'file-db:/usr/share/gdm/greeter-dconf-defaults'; then
+	echo "[YES] 'file-db:/usr/share/gdm/greeter-dconf-defaults' appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] 'file-db:/usr/share/gdm/greeter-dconf-defaults' doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Reviewing the /etc/dconf/db/gdm.d/01-banner-message file: " | tee -a ./audit_results.txt
+
+cat /etc/dconf/db/gdm.d/01-banner-message | tee -a ./audit_results.txt
+
+echo "[i] The above output must include '[org/gnome/login-screen', 'banner-message-enable=true' & 'banner-message-text=[policy compliant text]'" | tee -a ./audit_results.txt
+echo "[i] Manually review the 'banner-message-text=' and confirm it meets required policy" | tee -a ./audit_results.txt
+
+if cat /etc/dconf/db/gdm.d/01-banner-message | grep -q '[org/gnome/login-screen]'; then
+	echo "[YES] '[org/gnome/login-screen]' appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] '[org/gnome/login-screen]' doesn't appear to be set" | tee -a ./audit_results.txt
+fi
+
+if cat /etc/dconf/db/gdm.d/01-banner-message | grep -q 'banner-message-enable=true'; then
+	echo "[YES] 'banner-message-enable=true' appears to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] 'banner-message-enable=true' doesn't appear to be set" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
-# None of these are needed because Fedora doesn't come with the inetd services installed
-
 # 1.8.1 Ensure updates, patches, and additional security software are installed
 
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming all security updates are installed" | tee -a ./audit_results.txt
+echo "[i] Running 'check-update' command: " | tee -a ./audit_results.txt
+
+yum check-update --security | tee -a ./audit_results.txt
+
+# NEED TO KNOW WHAT THE EXPECTED OUTPUT HERE IS.  I IMAGINE ITS PRETTY VERBOSE SO MIGHT BE DIFFICULT TO RIGHT AN IF STATEMENT UNLESS
+# IT SAYS SOMETHING LIKE 'SYSTEM IS FULLY UP TO DATE'
+
+#########################################################################################################################################
+
 # 2.1.1 Ensure chargen services are not enabled
-
-# echo "[i] Turning off chargen services"
-
-# chkconfig chargen-dgram off
-# chkconfig chargen-stream off
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 2.1.2 Ensure daytime services are not enabled
-
-# echo "[i] Turning off daytime services"
-
-# chkconfig daytime-dgram off
-# chkconfig daytime-stream off
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 2.1.3 Ensure discard services are not enabled
-
-# echo "[i] Turning off discard services"
-
-# chkconfig discard-dgram off
-# chkconfig discard-stream off
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 2.1.4 Ensure echo services are not enabled
-
-# echo "[i] Turning off echo services"
-
-# chkconfig echo-dgram off
-# chkconfig echo-stream off
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 2.1.5 Ensure time services are not enabled
-
-# echo "[i] Turning off time services"
-
-# chkconfig time-dgram off
-# chkconfig time-stream off
-
-#---------------------------------------------------------------------------------------------------------------------------------------#
-
 # 2.1.6 Ensure tftp server is not enabled
 
-# echo "[i] Turning off tftp server"
+echo "############################################################################" >> ./audit_results.txt
 
-# chkconfig tftp off
+echo "[i] Confirming all necessary inetd services are disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'chkconfig' command: " | tee -a ./audit_results.txt
+
+chkconfig --list | tee -a ./audit_results.txt
+
+echo "[i] The above output should show that chargen, daytime, discard, echo, time and tftp services are 'off'" | tee -a ./audit_results.txt
+
+if chkconfig --list | grep -q 'chargen-dgram: off'; then
+	echo "[YES] chargen datagrams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] chargen datagrams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'chargen-stream: off'; then
+	echo "[YES] chargen streams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] chargen streams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'daytime-dgram: off'; then
+	echo "[YES] daytime datagrams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] daytime datagrams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'daytime-stream: off'; then
+	echo "[YES] daytime streams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] daytime streams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'discard-dgram: off'; then
+	echo "[YES] discard datagrams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] discard datagrams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'discard-stream: off'; then
+	echo "[YES] discard streams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] discard streams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'echo-dgram: off'; then
+	echo "[YES] echo datagrams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] echo datagrams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'echo-stream: off'; then
+	echo "[YES] echo streams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] echo streams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'time-dgram: off'; then
+	echo "[YES] time datagrams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] time datagrams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'time-stream: off'; then
+	echo "[YES] time streams are off" | tee -a ./audit_results.txt
+else
+	echo "[NO] time streams are on" | tee -a ./audit_results.txt
+fi
+
+if chkconfig --list | grep -q 'tftp: off'; then
+	echo "[YES] tftp is off" | tee -a ./audit_results.txt
+else
+	echo "[NO] tftp is on" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.1.7 Ensure xinetd is not enabled
 
-# echo "[i] Turning off xinetd"
+echo "############################################################################" >> ./audit_results.txt
 
-# systemctl disable xinetd
+echo "[i] Confirming inetd is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is enabled xinetd' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled xinetd | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled xinetd)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] xinetd is disabled"
+else
+	echo "[NO] xinetd is NOT disabled"
+fi
 
 #########################################################################################################################################
 
 # 2.2.1.2 Ensure ntp is configured
 
-echo "[i] Installing ntp"
+echo "############################################################################" >> ./audit_results.txt
 
-yum -y install ntp
+echo "[i] Confirming ntp is configured correctly" | tee -a ./audit_results.txt
+echo "[i] Auditing the ntp.conf file: " | tee -a ./audit_results.txt
 
-echo "[i] Configuring ntp"
+grep "^restrict" /etc/ntp.conf | tee -a ./audit_results.txt
 
-echo "restrict -4 default kod nomodify notrap nopeer noquery" > /etc/ntp.conf
-echo "restrict -6 default kod nomodify notrap nopeer noquery" >> /etc/ntp.conf
+echo "[i] Output from the above command should read: " | tee -a ./audit_results.txt
+echo "		restrict -4 default kod nomidify notrap nopeer noquery" | tee -a ./audit_results.txt
+echo "		restrict -6 default kod nomodify notrap nopeer noquery" | tee -a ./audit_results.txt
 
-# Adding NTP servers for the UK
-
-echo "server 0.uk.pool.ntp.org" >> /etc/ntp.conf
-echo "server 1.uk.pool.ntp.org" >> /etc/ntp.conf
-echo "server 2.uk.pool.ntp.org" >> /etc/ntp.conf
-echo "server 3.uk.pool.ntp.org" >> /etc/ntp.conf
-
-
-# Adding '-u ntp:ntp' to the /etc/sysconfig/ntpd
-
-if grep -q "^OPTIONS=" /etc/sysconfig/ntpd; then 
-	sed -i 's/^OPTIONS=.*/OPTIONS="-u ntp:ntp"/' /etc/sysconfig/ntpd
+if grep "^restrict" /etc/ntp.conf | grep -q 'restrict -4 default kod nomodify notrap nopeer noquery'; then
+	echo "[YES] IPv4 restrictions are set correctly" | tee -a ./audit_results.txt
 else
-    echo "OPTIONS=\"-u ntp:ntp\"" >> /etc/init.d/ntp
+	echo "[NO] IPv4 restrictions are NOT set correctly" | tee -a ./audit_results.txt
+fi
+
+if grep "^restrict" /etc/ntp.conf | grep -q 'restrict -6 default kod nomodify notrap nopeer noquery'; then
+	echo "[YES] IPv6 restrictions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] IPv6 restrictions are NOT set correctly" | tee -a ./audit_results.txt
+fi
+
+echo "[i] The following ntp servers are set: " | tee -a ./audit_results.txt
+
+grep "^server" /etc/ntp.conf | tee -a ./audit_results.txt
+
+echo "[i] You should manually confirm that these are the correct approved ntp servers to use" | tee -a ./audit_results.txt
+
+echo "[i] Confirming that the correct options are set in /etc/sysconfig/ntpd" | tee -a ./audit_results.txt
+
+grep "^OPTIONS" /etc/sysconfig/ntpd | tee -a ./audit_results.txt
+
+echo "[i] The above output should have '-u ntp:ntp' set within the options" | tee -a ./audit_results.txt
+
+if grep "^OPTIONS" /etc/ntp.conf | grep -q 'OPTIONS=\"-u ntp:ntp\"'; then
+	echo "[YES] OPTIONS appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The OPTIONS do NOT appear to be set correctly" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.1.3 Ensure chrony is configured 
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "[i] Configuring chrony"
 
@@ -823,12 +999,39 @@ echo "server 3.uk.pool.ntp.org" >> /etc/chrony.conf
 #########################################################################################################################################
 
 # 2.2.3 Ensure Avahi Server is not enabled
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 echo "[i] Disabling Avahi Server"
 systemctl disable avahi-daemon
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # DHCP Server isn't installed in Fedora by default
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # 2.2.5 Ensure DHCP Server is not enabled
 # echo "[i] Disabling DHCP Server"
@@ -839,6 +1042,17 @@ systemctl disable avahi-daemon
 
 # LDAP isn't installed in Fedora by default
 
+
+
+
+
+
+
+
+
+
+
+
 # 2.2.6 Ensure LDAP server is not enabled
 # echo "[i] Disabling LDAP server"
 # systemctl disable slapd
@@ -846,6 +1060,15 @@ systemctl disable avahi-daemon
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.7 Ensure NFS and RPC are not enabled 
+
+
+
+
+
+
+
+
+
 echo "[i] Disabling NFS and RPC"
 systemctl disable nfs-server
 systemctl disable rpcbind
@@ -853,6 +1076,16 @@ systemctl disable rpcbind
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.8 Ensure DNS Server is not enabled 
+
+
+
+
+
+
+
+
+
+
 
 # DNS Server isn't installed by default in Fedora
 
@@ -863,6 +1096,16 @@ systemctl disable rpcbind
 
 # 2.2.9 Ensure FTP Server is not enabled
 
+
+
+
+
+
+
+
+
+
+
 # FTP Server isn't installed by default in Fedora
 
 # echo "[i] Disabling FTP Server"
@@ -871,6 +1114,17 @@ systemctl disable rpcbind
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.10 Ensure HTTP Server is not enabled
+
+
+
+
+
+
+
+
+
+
+
 
 # Apache Server isn't installed by default in Fedora
 
@@ -881,6 +1135,16 @@ systemctl disable rpcbind
 
 # 2.2.11 Ensure IMAP and POP3 server is not enabled
 
+
+
+
+
+
+
+
+
+
+
 # dovecot Server isn't installed by default in Fedora
 
 # echo "[i] Disabling IMAP and POP3 Server"
@@ -889,6 +1153,18 @@ systemctl disable rpcbind
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.12 Ensure Samba is not enabled
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Samba isn't installed by default in Fedora
 
@@ -899,6 +1175,18 @@ systemctl disable rpcbind
 
 # 2.2.13 Ensure HTTP Proxy Server is not enabled
 
+
+
+
+
+
+
+
+
+
+
+
+
 # HTTP Proxy Server isn't installed by default in Fedora
 
 # echo "[i] Disabling HTTP Proxy Server"
@@ -908,6 +1196,17 @@ systemctl disable rpcbind
 
 # 2.2.14 Ensure SNMP Server is not enabled
 
+
+
+
+
+
+
+
+
+
+
+
 # SNMP Server isn't installed by default in Fedora
 
 # echo "[i] Disabling SNMP Server"
@@ -916,6 +1215,18 @@ systemctl disable rpcbind
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.15 Ensure mail transfer agent is configured for local-only mode
+
+
+
+
+
+
+
+
+
+
+
+
 
 # postfix isn't installed by default in Fedora
 
@@ -931,6 +1242,17 @@ systemctl disable rpcbind
 
 # 2.2.16 Ensure rsync service is not enabled
 
+
+
+
+
+
+
+
+
+
+
+
 # rsync service isn't installed by default in Fedora
 
 # echo "[i] Disabling rsync service"
@@ -940,12 +1262,33 @@ systemctl disable rpcbind
 
 # 2.2.17 Ensure NIS Server is not enabled
 
+
+
+
+
+
+
+
+
+
+
+
+
 # echo "[i] Disabling NIS Server"
 # systemctl disable nis
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.3.1 Ensure NIS Client is not installed
+
+
+
+
+
+
+
+
+
 
 echo "[i] Uninstalling NIS client"
 yum remove -y nis
