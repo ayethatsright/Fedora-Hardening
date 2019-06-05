@@ -680,7 +680,7 @@ echo "##########################################################################
 echo "[i] Confirming that prelink isn't installed" | tee -a ./audit_results.txt
 echo "[i] Running rpm to get prelink package info: " | tee -a ./audit_results.txt
 
-rpm -q prelink
+rpm -q prelink | tee -a ./audit_results.txt
 
 echo "Output from above command should be 'package prelink is not installed'" | tee -a ./audit_results.txt
 
@@ -974,527 +974,992 @@ fi
 
 # 2.2.1.3 Ensure chrony is configured 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming chrony is configured correctly" | tee -a ./audit_results.txt
+echo "[i] The following remote servers are set: " | tee -a ./audit_results.txt
 
+grep "^server" /etc/chrony.conf | tee -a ./audit_results.txt
 
+echo "[i] You should manually confirm that these are the correct approved remote servers to use" | tee -a ./audit_results.txt
 
+echo "[i] Confirming that the correct options are set in /etc/sysconfig/chronyd" | tee -a ./audit_results.txt
 
+grep "^OPTIONS" /etc/sysconfig/chronyd | tee -a ./audit_results.txt
 
+echo "[i] The above output should have '-u chrony' set within the options" | tee -a ./audit_results.txt
 
-
-
-
-
-
-echo "[i] Configuring chrony"
-
-sed -i 's/^pool.*/#/' /etc/chrony.conf
-
-# Adding NTP servers for the UK
-echo "server 0.uk.pool.ntp.org" >> /etc/chrony.conf
-echo "server 1.uk.pool.ntp.org" >> /etc/chrony.conf
-echo "server 2.uk.pool.ntp.org" >> /etc/chrony.conf
-echo "server 3.uk.pool.ntp.org" >> /etc/chrony.conf
+if grep "^OPTIONS" /etc/ntp.conf | grep -q 'OPTIONS=\"-u chrony\"'; then
+	echo "[YES] OPTIONS appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The OPTIONS do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 2.2.3 Ensure Avahi Server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming Avahi Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is enabled avahi-daemon' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled avahi-daemon | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled avahi-daemon)
 
-
-
-
-
-
-
-
-
-echo "[i] Disabling Avahi Server"
-systemctl disable avahi-daemon
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] Avahi Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] Avahi Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
-
-# DHCP Server isn't installed in Fedora by default
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # 2.2.5 Ensure DHCP Server is not enabled
-# echo "[i] Disabling DHCP Server"
-# systemctl disable isc-dhcp-server
-# systemctl disable isc-dhcp-server6
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming DHCP Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is enabled dhcp' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled dhcp | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled dhcp)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] DHCP Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] DHCP Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-# LDAP isn't installed in Fedora by default
+# 2.2.6 Ensure LDAP service is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming LDAP Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is enabled slapd' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled slapd | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled slapd)
 
-
-
-
-
-
-
-# 2.2.6 Ensure LDAP server is not enabled
-# echo "[i] Disabling LDAP server"
-# systemctl disable slapd
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] LDAP Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] LDAP Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.7 Ensure NFS and RPC are not enabled 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming NFS and RPC are disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is enabled nfs' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled nfs | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled nfs)
 
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] nfs is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] nfs is NOT disabled" | tee -a ./audit_results.txt
+fi
 
+echo "[i] Running 'systemctl is enabled nfs-server' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled nfs-server | tee -a ./audit_results.txt
 
-echo "[i] Disabling NFS and RPC"
-systemctl disable nfs-server
-systemctl disable rpcbind
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled nfs-server)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] nfs-server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] nfs-server is NOT disabled" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Running 'systemctl is enabled rpcbind' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled rpcbind | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled rpcbind)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] RPC is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] RPC is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.8 Ensure DNS Server is not enabled 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming DNS Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled named' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled named | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled named)
 
-
-
-
-
-
-# DNS Server isn't installed by default in Fedora
-
-# echo "[i] Disabling DNS Server"
-# systemctl disable bind9
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] DNS Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] DNS Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.9 Ensure FTP Server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming FTP Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled vsftpd' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled vsftpd | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled vsftpd)
 
-
-
-
-
-
-# FTP Server isn't installed by default in Fedora
-
-# echo "[i] Disabling FTP Server"
-# systemctl disable vsftpd
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] FTP Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] FTP Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.10 Ensure HTTP Server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming HTTP Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled httpd' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled httpd | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled httpd)
 
-
-
-
-
-
-
-# Apache Server isn't installed by default in Fedora
-
-# echo "[i] Disabling HTTP Server"
-# systemctl disable apache2
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] HTTP Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] HTTP Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.11 Ensure IMAP and POP3 server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming IMAP and POP3 Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled dovecot' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled dovecot | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled dovecot)
 
-
-
-
-
-
-# dovecot Server isn't installed by default in Fedora
-
-# echo "[i] Disabling IMAP and POP3 Server"
-# systemctl disable dovecot
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] IMAP and POP3 Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] IMAP and POP3 Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.12 Ensure Samba is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming Samba is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled smb' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled smb | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled smb)
 
-
-
-
-
-
-
-
-# Samba isn't installed by default in Fedora
-
-# echo "[i] Disabling Samba"
-# systemctl disable smbd
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] Samba is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] Samba is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.13 Ensure HTTP Proxy Server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming HTTP Proxy Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled squid' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled squid | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled squid)
 
-
-
-
-
-
-
-
-# HTTP Proxy Server isn't installed by default in Fedora
-
-# echo "[i] Disabling HTTP Proxy Server"
-# systemctl disable squid
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] HTTP Proxy Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] HTTP Proxy Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.14 Ensure SNMP Server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming SNMP Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled snmpd' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled snmpd | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled snmpd)
 
-
-
-
-
-
-
-# SNMP Server isn't installed by default in Fedora
-
-# echo "[i] Disabling SNMP Server"
-# systemctl disable snmpd
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] SNMP Server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] SNMP Server is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.15 Ensure mail transfer agent is configured for local-only mode
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming mail transfer agent is configured for local-only mode" | tee -a ./audit_results.txt
+echo "[i] Running 'netstat' command: " | tee -a ./audit_results.txt
 
+netstat -an | grep LIST | grep ":25[[:space:]]" | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should read 'tcp 0 0 127.0.0.1:25 0.0.0.0:* LISTEN'" | tee -a ./audit_results.txt
 
+var=$(netstat -an | grep LIST | grep ":25[[:space:]]")
 
-
-
-
-
-
-
-
-# postfix isn't installed by default in Fedora
-
-# echo "[i] Configuring mail transfer agent for local-only mode"
-# if grep -q "^inet_interfaces = " /etc/postfix/main.cf; then 
-# 	sed -i 's/^inet_interfaces.*/inet_interface = loopback-only/' /etc/postfix/main.cf
-# else
-#     echo "inet_interfaces = loopback-only" >> /etc/postfix/main.cf
-# fi
-# systemctl restart postfix
+if [[ "$var" == "tcp 0 0 127.0.0.1:25 0.0.0.0:* LISTEN" ]]; then
+	echo "[YES] Mail transfer agent appears to be set in local-only mode" | tee -a ./audit_results.txt
+else
+	echo "[NO] Mail transfer agent appears NOT to be set in local-only mode" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.16 Ensure rsync service is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming rsync service is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled ypserv' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled ypserv | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled ypserv)
 
-
-
-
-
-
-
-# rsync service isn't installed by default in Fedora
-
-# echo "[i] Disabling rsync service"
-# systemctl disable rsync
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] rsync service is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] rsync service is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.2.17 Ensure NIS Server is not enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming rsh Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled rsh.socket' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled rsh.socket | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled rsh.socket)
 
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] rsh.socket is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] rsh.socket is NOT disabled" | tee -a ./audit_results.txt
+fi
 
+echo "[i] Running 'systemctl is-enabled rlogin.socket' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled rlogin.socket | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled rlogin.socket)
 
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] rlogin.socket is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] rlogin.socket is NOT disabled" | tee -a ./audit_results.txt
+fi
 
+echo "[i] Running 'systemctl is-enabled rexec.socket' command: " | tee -a ./audit_results.txt
 
-# echo "[i] Disabling NIS Server"
-# systemctl disable nis
+systemctl is-enabled rexec.socket | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled rexec.socket)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] rexec.socket is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] rexec.socket is NOT disabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
+# 2.2.18 Ensure talk server is not enabled 
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming talk Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled ntalk' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled ntalk | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled ntalk)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] talk server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] talk server is NOT disabled" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
+# 2.2.19 Ensure telnet server is not enabled 
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming telnet Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled telnet.socket' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled telnet.socket | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled telnet.socket)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] telnet server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] telnet server is NOT disabled" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
+# 2.2.20 Ensure tftp server is not enabled 
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming tftp Server is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled tftp.socket' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled tftp.socket | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled tftp.socket)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] tftp server is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] tftp server is NOT disabled" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
+# 2.2.21 Ensure rsync service is not enabled 
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming rsync service is disabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled rsyncd' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled rsyncd | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is disabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled rsyncd)
+
+if [[ "$var" == "disabled" ]]; then
+	echo "[YES] rsync service is disabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] rsync service is NOT disabled" | tee -a ./audit_results.txt
+fi
+
+#########################################################################################################################################
+
 # 2.3.1 Ensure NIS Client is not installed
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming that NIS Client isn't installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm to get ypbind package info: " | tee -a ./audit_results.txt
 
+rpm -q ypbind | tee -a ./audit_results.txt
 
+echo "Output from above command should be 'package ypbind is not installed'" | tee -a ./audit_results.txt
 
+var=$(rpm -q ypbind)
 
-
-
-
-
-echo "[i] Uninstalling NIS client"
-yum remove -y nis
+if [[ "$var" == "package ypbind is not installed" ]]; then
+	echo "[YES] NIS Client is not installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] NIS Client IS installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.3.2 Ensure rsh client is not installed
 
-echo "[i] Uninstalling the rsh client"
-yum remove -y rsh-client rsh-redone-client
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming that rsh Client isn't installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm to get rsh package info: " | tee -a ./audit_results.txt
+
+rpm -q rsh | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'package rsh is not installed'" | tee -a ./audit_results.txt
+
+var=$(rpm -q rsh)
+
+if [[ "$var" == "package rsh is not installed" ]]; then
+	echo "[YES] rsh Client is not installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] rsh Client IS installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.3.3 Ensure talk client is not installed
 
-echo "[i] Uninstalling the talk client"
-yum remove -y talk
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming that talk Client isn't installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm to get talk package info: " | tee -a ./audit_results.txt
+
+rpm -q talk | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'package talk is not installed'" | tee -a ./audit_results.txt
+
+var=$(rpm -q talk)
+
+if [[ "$var" == "package talk is not installed" ]]; then
+	echo "[YES] talk Client is not installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] talk Client IS installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.3.4 Ensure telnet client is not installed 
 
-echo "[i] Uninstalling the telnet client"
-yum remove -y telnet
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming that telnet Client isn't installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm to get telnet package info: " | tee -a ./audit_results.txt
+
+rpm -q telnet | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'package telnet is not installed'" | tee -a ./audit_results.txt
+
+var=$(rpm -q telnet)
+
+if [[ "$var" == "package telnet is not installed" ]]; then
+	echo "[YES] telnet Client is not installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] telnet Client IS installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 2.3.5 Ensure LDAP client is not installed 
 
-echo "[i] Uninstalling the LDAP client"
-yum remove -y ldap-utils
+echo "############################################################################" >> ./audit_results.txt
 
-#---------------------------------------------------------------------------------------------------------------------------------------#
+echo "[i] Confirming that LDAP Client isn't installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm to get openldap-clients package info: " | tee -a ./audit_results.txt
 
-# 3.1.1 Ensure IP forwarding is disabled 
-# 3.1.2 Ensure packet redirect sending is disabled 
-# This are only required if the system is to act as a host only.  If needed, 
-# run the 'workstation_cis_hardening_level1_scored_HOSTONLY.sh' script to apply these controls
+rpm -q openldap-clients | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'package openldap-clients is not installed'" | tee -a ./audit_results.txt
+
+var=$(rpm -q openldap-clients)
+
+if [[ "$var" == "package openldap-clients is not installed" ]]; then
+	echo "[YES] NIS Client is not installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] NIS Client IS installed" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 3.2.1 Ensure source routed packets are not accepted
 
-echo "[i] Ensuring source routed packets are not accepted"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.all.accept_source_route" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.all.accept_source_route.*/net.ipv4.conf.all.accept_source_route = 0/' /etc/sysctl.conf
+echo "[i] Confirming that source routed packets are not accepted" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.conf.all.accept_source_route | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.accept_source_route = 0'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.all.accept_source_route)
+
+if [[ "$var" == "net.ipv4.conf.all.accept_source_route = 0" ]]; then
+	echo "[YES] The accept source control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.all.accept_source_route = 0" >> /etc/sysctl.conf
+	echo "[NO] The accept source control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+sysctl net.ipv4.conf.default.accept_source_route | tee -a ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.default.accept_source_route" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.default.accept_source_route.*/net.ipv4.conf.default.accept_source_route = 0/' /etc/sysctl.conf
+echo "Output from above command should be 'net.ipv4.conf.default.accept_source_route = 0'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.default.accept_source_route)
+
+if [[ "$var" == "net.ipv4.conf.default.accept_source_route = 0" ]]; then
+	echo "[YES] The default source control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.default.accept_source_route = 0" >> /etc/sysctl.conf
+	echo "[NO] The default source control is not set correctly" | tee -a ./audit_results.txt
 fi
 
-sysctl -w net.ipv4.conf.all.accept_source_route=0
-sysctl -w net.ipv4.conf.default.accept_source_route=0
-sysctl -w net.ipv4.route.flush=1
+grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.accept_source_route= 0'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.all.accept_source_route= 0" ]]; then
+	echo "[YES] The accept source control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The accept source control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
+
+grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.default.accept_source_route= 0'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.default.accept_source_route= 0" ]]; then
+	echo "[YES] The default source control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The default source control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.2 Ensure ICMP redirects are not accepted
 
-echo "[i] Ensuring ICMP redirects are not accepted"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.all.accept_redirects" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.all.accept_redirects.*/net.ipv4.conf.all.accept_redirects = 0/' /etc/sysctl.conf
+echo "[i] Confirming that ICMP redirects are not accepted" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.conf.all.accept_redirects | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.accept_redirects = 0'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.all.accept_redirects)
+
+if [[ "$var" == "net.ipv4.conf.all.accept_redirects = 0" ]]; then
+	echo "[YES] The accept redirects control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.all.accept_redirects = 0" >> /etc/sysctl.conf
+	echo "[NO] The accept redirects control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+sysctl sysctl net.ipv4.conf.default.accept_redirects | tee -a ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.default.accept_redirects" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.default.accept_redirects.*/net.ipv4.conf.default.accept_redirects = 0/' /etc/sysctl.conf
+echo "Output from above command should be 'net.ipv4.conf.default.accept_redirects = 0'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.default.accept_redirects)
+
+if [[ "$var" == "net.ipv4.conf.default.accept_redirects = 0" ]]; then
+	echo "[YES] The default redirect control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.default.accept_redirects = 0" >> /etc/sysctl.conf
+	echo "[NO] The default redirect control is not set correctly" | tee -a ./audit_results.txt
 fi
 
-sysctl -w net.ipv4.conf.all.accept_redirects=0
-sysctl -w net.ipv4.conf.default.accept_redirects=0
-sysctl -w net.ipv4.route.flush=1
+grep "net\.ipv4\.conf\.all\.accept_redirects" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.accept_redirects= 0'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.all\.accept_redirects" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.all.accept_redirects= 0" ]]; then
+	echo "[YES] The accept redirect control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The accept redirect control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
+
+grep "net\.ipv4\.conf\.default\.accept_redirects" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.default.accept_redirects= 0'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.default\.accept_redirects" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.default.accept_redirects= 0" ]]; then
+	echo "[YES] The default redirect control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The default redirect control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.3 Ensure secure ICMP redirects are not accepted
 
-echo "[i] Ensuring secure ICMP redirects are not accepted"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.all.secure_redirects" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.all.secure_redirects.*/net.ipv4.conf.all.secure_redirects = 0/' /etc/sysctl.conf
+echo "[i] Confirming that secure ICMP redirects are not accepted" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.conf.all.secure_redirects | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.secure_redirects = 0'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.all.secure_redirects)
+
+if [[ "$var" == "net.ipv4.conf.all.secure_redirects = 0" ]]; then
+	echo "[YES] The secure accept redirects control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.all.secure_redirects = 0" >> /etc/sysctl.conf
+	echo "[NO] The secure accept redirects control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+sysctl net.ipv4.conf.default.secure_redirects | tee -a ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.default.secure_redirects" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.default.secure_redirects.*/net.ipv4.conf.default.secure_redirects = 0/' /etc/sysctl.conf
+echo "Output from above command should be 'net.ipv4.conf.default.secure_redirects = 0'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.default.secure_redirects)
+
+if [[ "$var" == "net.ipv4.conf.default.secure_redirects = 0" ]]; then
+	echo "[YES] The secure default redirect control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.default.secure_redirects = 0" >> /etc/sysctl.conf
+	echo "[NO] The secure default redirect control is not set correctly" | tee -a ./audit_results.txt
 fi
 
-sysctl -w net.ipv4.conf.all.secure_redirects=0
-sysctl -w net.ipv4.conf.default.secure_redirects=0
-sysctl -w net.ipv4.route.flush=1
+grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.secure_redirects= 0'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.all\.secure_redirects" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.all.secure_redirects= 0" ]]; then
+	echo "[YES] The secure accept redirect control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The secure accept redirect control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
+
+grep "net\.ipv4\.conf\.default\.secure_redirects" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.default.secure_redirects= 0'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.default\.secure_redirects" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.default.secure_redirects= 0" ]]; then
+	echo "[YES] The secure default redirect control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The secure default redirect control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.4 Ensure suspicious packets are logged 
 
-echo "[i] Ensuring suspicious packets are logged"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.all.log_martians" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.all.log_martians.*/net.ipv4.conf.all.log_martians = 1/' /etc/sysctl.conf
+echo "[i] Confirming that suspicious packets are logged" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.conf.all.log_martians | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.log_martians = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.all.log_martians)
+
+if [[ "$var" == "net.ipv4.conf.all.log_martians = 1" ]]; then
+	echo "[YES] The 'all' control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.all.log_martians = 1" >> /etc/sysctl.conf
+	echo "[NO] The 'all' control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+sysctl net.ipv4.conf.default.log_martians | tee -a ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.default.log_martians" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.default.log_martians.*/net.ipv4.conf.default.log_martians = 1/' /etc/sysctl.conf
+echo "Output from above command should be 'net.ipv4.conf.default.log_martians = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.default.log_martians)
+
+if [[ "$var" == "net.ipv4.conf.default.log_martians = 1" ]]; then
+	echo "[YES] The 'default' control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.default.log_martians = 1" >> /etc/sysctl.conf
+	echo "[NO] The 'default' control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+grep "net\.ipv4\.conf\.all\.log_martians" /etc/sysctl.conf | tee -a ./audit_results.txt
 
-sysctl -w net.ipv4.conf.all.log_martians=1
-sysctl -w net.ipv4.conf.default.log_martians=1
-sysctl -w net.ipv4.route.flush=1
+echo "Output from above command should be 'net.ipv4.conf.all.log_martians = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.all\.log_martians" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.all.log_martians = 1" ]]; then
+	echo "[YES] The 'all' control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The 'all' control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
+
+grep "net\.ipv4\.conf\.default\.log_martians" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.default.log_martians = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.default\.log_martians" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.default.log_martians = 1" ]]; then
+	echo "[YES] The 'default' control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The 'default' control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.5 Ensure broadcast ICMP requests are ignored
 
-echo "[i] Ensuring broadcast ICMP requests are ignored"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.icmp_echo_ignore_broadcasts" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.icmp_echo_ignore_broadcasts.*/net.ipv4.icmp_echo_ignore_broadcasts = 1/' /etc/sysctl.conf
+echo "[i] Confirming broadcast ICMP requests are ignored" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.icmp_echo_ignore_broadcasts | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.icmp_echo_ignore_broadcasts = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.icmp_echo_ignore_broadcasts)
+
+if [[ "$var" == "net.ipv4.icmp_echo_ignore_broadcasts = 1" ]]; then
+	echo "[YES] ICMP broadcasts are ignored" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.icmp_echo_ignore_broadcasts = 1" >> /etc/sysctl.conf
+	echo "[NO] ICMP broadcasts are not ignored" | tee -a ./audit_results.txt
 fi
 
-sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
-sysctl -w net.ipv4.route.flush=1
+grep "net\.ipv4\.icmp_echo_ignore_broadcasts" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.icmp_echo_ignore_broadcasts = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.icmp_echo_ignore_broadcasts" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.icmp_echo_ignore_broadcasts = 1" ]]; then
+	echo "[YES] The configuration file is configured correctly to ignore ICMP broadcasts" | tee -a ./audit_results.txt
+else
+	echo "[NO] The configuration file is NOT configured correctly to ignore ICMP broadcasts" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.6 Ensure bogus ICMP responses are ignored
 
-echo "[i] Ensuring bogus ICMP responses are ignored"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.icmp_ignore_bogus_error_responses" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.icmp_ignore_bogus_error_responses.*/net.ipv4.icmp_ignore_bogus_error_responses = 1/' /etc/sysctl.conf
+echo "[i] Confirming bogus ICMP responses are ignored" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.icmp_ignore_bogus_error_responses | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.icmp_ignore_bogus_error_responses = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.icmp_ignore_bogus_error_responses)
+
+if [[ "$var" == "net.ipv4.icmp_ignore_bogus_error_responses = 1" ]]; then
+	echo "[YES] Bogus ICMP responses are ignored" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" >> /etc/sysctl.conf
+	echo "[NO] Bogus ICMP broadcasts are not ignored" | tee -a ./audit_results.txt
 fi
 
+grep "net\.ipv4\.icmp_ignore_bogus_error_responses" /etc/sysctl.conf | tee -a ./audit_results.txt
 
-sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
-sysctl -w net.ipv4.route.flush=1
+echo "Output from above command should be 'net.ipv4.icmp_ignore_bogus_error_responses = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.icmp_ignore_bogus_error_responses" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.icmp_ignore_bogus_error_responses = 1" ]]; then
+	echo "[YES] The configuration file is configured correctly to ignore bogus ICMP responses" | tee -a ./audit_results.txt
+else
+	echo "[NO] The configuration file is NOT configured correctly to ignore bogus ICMP responses" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.7 Ensure Reverse Path Filtering is enabled
 
-echo "[i] Ensuring Reverse Path Filtering is enabled"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.all.rp_filter" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.all.rp_filter.*/net.ipv4.conf.all.rp_filter = 1/' /etc/sysctl.conf
+echo "[i] Confirming Reverse Path Filtering is enabled" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.conf.all.rp_filter | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.all.rp_filter = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.all.rp_filter)
+
+if [[ "$var" == "net.ipv4.conf.all.rp_filter = 1" ]]; then
+	echo "[YES] The 'all' control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
+	echo "[NO] The 'all' control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+sysctl net.ipv4.conf.default.rp_filter | tee -a ./audit_results.txt
 
-if grep -q "^net.ipv4.conf.default.rp_filter" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.conf.default.rp_filter.*/net.ipv4.conf.default.rp_filter = 1/' /etc/sysctl.conf
+echo "Output from above command should be 'net.ipv4.conf.default.rp_filter = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.conf.default.rp_filter)
+
+if [[ "$var" == "net.ipv4.conf.default.rp_filter = 1" ]]; then
+	echo "[YES] The 'default' control is set correctly" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.conf.default.rp_filter = 1" >> /etc/sysctl.conf
+	echo "[NO] The 'default' control is not set correctly" | tee -a ./audit_results.txt
 fi
 
+grep "net\.ipv4\.conf\.all\.rp_filter" /etc/sysctl.conf | tee -a ./audit_results.txt
 
-sysctl -w net.ipv4.conf.all.rp_filter=1
-sysctl -w net.ipv4.conf.default.rp_filter=1
-sysctl -w net.ipv4.route.flush=1
+echo "Output from above command should be 'net.ipv4.conf.all.rp_filter = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.all\.rp_filter" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.all.rp_filter = 1" ]]; then
+	echo "[YES] The 'all' control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The 'all' control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
+
+grep "net\.ipv4\.conf\.default\.rp_filter" /etc/sysctl.conf | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.conf.default.rp_filter = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.conf\.default\.rp_filter" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.conf.default.rp_filter = 1" ]]; then
+	echo "[YES] The 'default' control is set correctly in the configuration file" | tee -a ./audit_results.txt
+else
+	echo "[NO] The 'default' control is not set correctly in the configuration file" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.2.8 Ensure TCP SYN Cookies is enabled
 
-echo "[i] Ensuring TCP SYN Cookies is enabled"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^net.ipv4.tcp_syncookies" /etc/sysctl.conf; then 
-	sed -i 's/^net.ipv4.tcp_syncookies.*/net.ipv4.tcp_syncookies = 1/' /etc/sysctl.conf
+echo "[i] Confirming TCP SYN Cookies is enabled" | tee -a ./audit_results.txt
+echo "[i] Running sysctl command to get relevant information: " | tee -a ./audit_results.txt
+
+sysctl net.ipv4.tcp_syncookies | tee -a ./audit_results.txt
+
+echo "Output from above command should be 'net.ipv4.tcp_syncookies = 1'" | tee -a ./audit_results.txt
+
+var=$(sysctl net.ipv4.tcp_syncookies)
+
+if [[ "$var" == "net.ipv4.tcp_syncookies = 1" ]]; then
+	echo "[YES] TCP SYN Cookies is enabled" | tee -a ./audit_results.txt
 else
-    echo "net.ipv4.tcp_syncookies = 1" >> /etc/sysctl.conf
+	echo "[NO] TCP SYN Cookies is NOT enabled" | tee -a ./audit_results.txt
 fi
 
+grep "net\.ipv4\.tcp_syncookies" /etc/sysctl.conf | tee -a ./audit_results.txt
 
-sysctl -w net.ipv4.tcp_syncookies=1
-sysctl -w net.ipv4.route.flush=1
+echo "Output from above command should be 'net.ipv4.tcp_syncookies = 1'" | tee -a ./audit_results.txt
+
+var=$(grep "net\.ipv4\.tcp_syncookies" /etc/sysctl.conf)
+
+if [[ "$var" == "net.ipv4.tcp_syncookies = 1" ]]; then
+	echo "[YES] The configuration file is configured correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The configuration file is NOT configured correctly" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 3.4.1 Ensure TCP Wrappers is installed 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "[i] Installing TCP Wrappers"
 yum install -y tcp_wrappers
@@ -1502,6 +1967,23 @@ yum install -y tcp_wrappers
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.4.2 Ensure /etc/hosts.allow is configured 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # This control is dependent on the individual organisation so will need to be set manually
 # By default, nothing is in the hosts.allow so when we generate the hosts.deny in the next section, no IP addresses with be permitted to connect with the host
@@ -1512,6 +1994,20 @@ echo "ALL: 192.168.0.0/255.255.0.0" > /etc/hosts.allow
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.4.3 Ensure /etc/hosts.deny is configured 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "[i] The hosts.deny file is being created with a default 'deny all' rule"
 echo "ALL: ALL" >> /etc/hosts.deny
@@ -2158,14 +2654,3 @@ chmod 000 /etc/gshadow-
 # 6.2.17 Ensure no duplicate GIDs exist
 # 6.2.18 Ensure no duplicate user names exist
 # 6.2.19 Ensure no duplicate group names exist
-
-# The above are all audit tasks which don't need to be done during initial setup (because none of them are there by default)
-
-
-#########################################################################################################################################
-
-# Rebooting system to ensure all changes take effect
-
-read -r -p "[i] System will now reboot to ensure all changes take effect. Press ENTER to continue..."
-
-sudo reboot
