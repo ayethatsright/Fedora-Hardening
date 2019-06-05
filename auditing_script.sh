@@ -2248,425 +2248,751 @@ fi
 
 # 4.2.4 Ensure permissions on all logfiles are configured 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming permissions are set correctly on all log files" | tee -a ./audit_results.txt
+echo "[i] Getting file permsissions: " | tee -a ./audit_results.txt
 
+find /var/log -type f -ls | tee -a ./audit_results.txt
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-echo "[i] Setting correct permissions on all log files"
-
-find /var/log -type f -exec chmod g-wx,o-rwx {} +
+echo "[i] Manually check the above output and ensure that 'other' has no permissions on any files and 'group' does not have write or execute permissions on any files" | tee -a ./audit_results.txt
 
 #########################################################################################################################################
 
 # 5.1.1 Ensure cron daemon is enabled
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming cron daemon service is enabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled crond' command: " | tee -a ./audit_results.txt
 
+systemctl is-enabled crond | tee -a ./audit_results.txt
 
+echo "[i] Output from the above command should state that it is enabled" | tee -a ./audit_results.txt
 
+var=$(systemctl is-enabled crond)
 
-
-
-
-
-
-
-
-
-
-
-echo "[i] Enabling the cron daemon"
-systemctl enable cron
+if [[ "$var" == "enabled" ]]; then
+	echo "[YES] crond service is enabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] crond service is NOT enabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 5.1.2 Ensure permissions on /etc/crontab are configured
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming permissions on /etc/crontab are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/crontab: " | tee -a ./audit_results.txt
 
+stat /etc/crontab | tee -a ./audit_results.txt
 
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
 
-
-
-
-
-
-
-
-
-echo "[i] Setting the correct permissions on /etc/crontab"
-
-chown root:root /etc/crontab
-chmod og-rwx /etc/crontab
+if stat /etc/crontab | grep -q 'Access: (0600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 5.1.3 Ensure permissions on /etc/cron.hourly are configured
 
-echo "[i] Setting the correct permissions on /etc/cron.hourly"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/cron.hourly
-chmod og-rwx /etc/cron.hourly
+echo "[i] Confirming permissions on /etc/cron.hourly are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.hourly: " | tee -a ./audit_results.txt
+
+stat /etc/cron.hourly | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.hourly | grep -q 'Access: (0700/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.1.4 Ensure permissions on /etc/cron.daily are configured 
-echo "[i] Setting the correct permissions on /etc/cron.daily"
-chown root:root /etc/cron.daily
-chmod og-rwx /etc/cron.daily
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming permissions on /etc/cron.daily are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.daily: " | tee -a ./audit_results.txt
+
+stat /etc/cron.daily | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.hourly | grep -q 'Access: (0700/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.1.5 Ensure permissions on /etc/cron.weekly are configured
 
-echo "[i] Setting the correct permissions on /etc/cron.weekly"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/cron.weekly
-chmod og-rwx /etc/cron.weekly
+echo "[i] Confirming permissions on /etc/cron.weekly are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.weekly: " | tee -a ./audit_results.txt
+
+stat /etc/cron.weekly | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.weekly | grep -q 'Access: (0700/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.1.6 Ensure permissions on /etc/cron.monthly are configured
 
-echo "[i] Setting the correct permissions on /etc/cron.monthly"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/cron.monthly
-chmod og-rwx /etc/cron.monthly
+echo "[i] Confirming permissions on /etc/cron.monthly are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.monthly: " | tee -a ./audit_results.txt
+
+stat /etc/cron.monthly | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.monthly | grep -q 'Access: (0700/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.1.7 Ensure permissions on /etc/cron.d are configured
 
-echo "[i] Setting the correct permissions on /etc/cron.d"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/cron.d
-chmod og-rwx /etc/cron.d
+echo "[i] Confirming permissions on /etc/cron.d are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.d: " | tee -a ./audit_results.txt
+
+stat /etc/cron.d | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.d | grep -q 'Access: (0700/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.1.8 Ensure at/cron is restricted to authorized users
 
-echo "[i] Restricting at/cron to authorised users"
+echo "############################################################################" >> ./audit_results.txt
 
-rm /etc/cron.deny
-rm /etc/at.deny
-touch /etc/cron.allow
-touch /etc/at.allow
-chmod og-rwx /etc/cron.allow
-chmod og-rwx /etc/at.allow
-chown root:root /etc/cron.allow
-chown root:root /etc/at.allow
+echo "[i] Confirming cron.deny is restricted to authorised users" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.deny: " | tee -a ./audit_results.txt
+
+stat /etc/cron.deny | tee -a ./audit_results.txt
+
+echo "[i] The output above should indicate that 'No such file or directory' exists" | tee -a ./audit_results.txt
+
+if stat /etc/cron.deny | grep -q 'stat: cannot stat \`/etc/cron.deny\': No such file or directory'; then
+	echo "[YES] cron.deny is restricted" | tee -a ./audit_results.txt
+else
+	echo "[NO] cron.deny is NOT restricted" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming at.deny is restricted to authorised users" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/at.deny: " | tee -a ./audit_results.txt
+
+stat /etc/at.deny | tee -a ./audit_results.txt
+
+echo "[i] The output above should indicate that 'No such file or directory' exists" | tee -a ./audit_results.txt
+
+if stat /etc/at.deny | grep -q 'stat: cannot stat \`/etc/at.deny\': No such file or directory'; then
+	echo "[YES] at.deny is restricted" | tee -a ./audit_results.txt
+else
+	echo "[NO] at.deny is NOT restricted" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming permissions on /etc/cron.allow are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/cron.allow: " | tee -a ./audit_results.txt
+
+stat /etc/cron.allow | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.allow | grep -q 'Access: (0600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming permissions on /etc/at.allow are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/at.allow: " | tee -a ./audit_results.txt
+
+stat /etc/at.allow | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/cron.allow | grep -q 'Access: (0600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured correctly
 
-echo "[i] Setting correct permission on /etc/ssh/sshd_config"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/ssh/sshd_config
-chmod og-rwx /etc/ssh/sshd_config
+echo "[i] Confirming permissions on /etc/ssh/sshd_config are configured correctly" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+stat /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should have Uid and Gid set as 0 and 'group' and 'other' should have no permissions set" | tee -a ./audit_results.txt
+
+if stat /etc/ssh/sshd_config | grep -q 'Access: (0600/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.2 Ensure SSH Protocol is set to 2
 
-echo "[i] Ensuring SSH Protocol is set to 2"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^Protocol" /etc/ssh/sshd_config; then 
-	sed -i 's/^Protocol.*/Protocol 2/' /etc/ssh/sshd_config
+echo "[i] Confirming SSH Protocol 2 is set" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^Protocol" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'Protocol 2" | tee -a ./audit_results.txt
+
+var=$(grep "^Protocol" /etc/ssh/sshd_config)
+
+if [[ "$var" == "Protocol 2" ]]; then
+	echo "[YES] Protocol 2 is set" | tee -a ./audit_results.txt
 else
-    echo "Protocol 2" >> /etc/ssh/sshd_config
+	echo "[NO] Protocol 2 is NOT set" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.3 Ensure SSH LogLevel is set to INFO
 
-echo "[i] Ensuring SSH LogLevel is set to INFO"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^LogLevel" /etc/ssh/sshd_config; then 
-	sed -i 's/^LogLevel.*/LogLevel INFO/' /etc/ssh/sshd_config
+echo "[i] Confirming SSH LogLevel is set to INFO" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^LogLevel" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'LogLevel INFO'" | tee -a ./audit_results.txt
+
+var=$(grep "^LogLevel" /etc/ssh/sshd_config)
+
+if [[ "$var" == "LogLevel INFO" ]]; then
+	echo "[YES] LogLevel is set to INFO" | tee -a ./audit_results.txt
 else
-    echo "LogLevel INFO" >> /etc/ssh/sshd_config
+	echo "[NO] LogLevel is NOT set to INFO" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.4 Ensure SSH X11 forwarding is disabled
 
-echo "[i] Disabling SSH X11 forwarding"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^X11Forwarding" /etc/ssh/sshd_config; then 
-	sed -i 's/^X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config
+echo "[i] Confirming SSH X11 is disabled" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^X11Forwarding" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'X11 Forwarding no'" | tee -a ./audit_results.txt
+
+var=$(grep "^X11Forwarding" /etc/ssh/sshd_config)
+
+if [[ "$var" == "X11Forwarding no" ]]; then
+	echo "[YES] X11 forwarding is disabled" | tee -a ./audit_results.txt
 else
-    echo "X11Forwarding No" >> /etc/ssh/sshd_config
+	echo "[NO] X11 forwarding is NOT disabled" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.5 Ensure SSH MaxAuthTries is set to 4 or less
 
-echo "[i] Setting SSH MaxAuthTries to 4"
-if grep -q "^MaxAuthTries" /etc/ssh/sshd_config; then 
-	sed -i 's/^MaxAuthTries.*/MaxAuthTries 4/' /etc/ssh/sshd_config
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming SSH MaxAuthTries is set to 4" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^MaxAuthTries" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'MaxAuthTries 4'" | tee -a ./audit_results.txt
+
+var=$(grep "^MaxAuthTries" /etc/ssh/sshd_config)
+
+if [[ "$var" == "MaxAuthTries 4" ]]; then
+	echo "[YES] MaxAuthTries is set to 4" | tee -a ./audit_results.txt
 else
-    echo "MaxAuthTries 4" >> /etc/ssh/sshd_config
+	echo "[NO] MaxAuthTries is NOT set to 4" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.6 Ensure SSH IgnoreRhosts is enabled
 
-echo "[i] Enabling SSH IgnoreRhosts"
-if grep -q "^IgnoreRhosts" /etc/ssh/sshd_config; then 
-	sed -i 's/^IgnoreRhosts.*/IgnoreRhosts yes/' /etc/ssh/sshd_config
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming SSH IgnoreRhosts is enabled" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^IgnoreRhosts" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'IgnoreRhosts yes'" | tee -a ./audit_results.txt
+
+var=$(grep "^IgnoreRhosts" /etc/ssh/sshd_config)
+
+if [[ "$var" == "IgnoreRhosts yes" ]]; then
+	echo "[YES] IgnoreRhosts is set" | tee -a ./audit_results.txt
 else
-    echo "IgnoreRhosts yes" >> /etc/ssh/sshd_config
+	echo "[NO] IgnoreRhosts is NOT set" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.7 Ensure SSH HostbasedAuthentication is disabled
 
-echo "[i] Disabling SSH HostbasedAuthentication"
-if grep -q "^HostbasedAuthentication" /etc/ssh/sshd_config; then 
-	sed -i 's/^HostbasedAuthentication.*/HostbasedAuthentication no/' /etc/ssh/sshd_config
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming SSH HostbasedAuthentication is disabled" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^HostbasedAuthentication" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'HostbasedAuthentication no'" | tee -a ./audit_results.txt
+
+var=$(grep "^HostbasedAuthentication" /etc/ssh/sshd_config)
+
+if [[ "$var" == "HostbasedAuthentication no" ]]; then
+	echo "[YES] HostbasedAuthentication is disabled" | tee -a ./audit_results.txt
 else
-    echo "HostbasedAuthentication no" >> /etc/ssh/sshd_config
+	echo "[NO] HostbasedAuthentication is NOT disabled" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.8 Ensure SSH root login is disabled
 
-echo "[i] Disabling SSH root login"
-if grep -q "^PermitRootLogin" /etc/ssh/sshd_config; then 
-	sed -i 's/^PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming SSH root login is disabled" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^PermitRootLogin" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'PermitRootLogin no'" | tee -a ./audit_results.txt
+
+var=$(grep "^PermitRootLogin" /etc/ssh/sshd_config)
+
+if [[ "$var" == "PermitRootLogin no" ]]; then
+	echo "[YES] PermitRootLogin is disabled" | tee -a ./audit_results.txt
 else
-    echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+	echo "[NO] PermitRootLogin is NOT disabled" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-# Ensure SSH PermitEmptyPasswords is disabled
+# 5.2.9 Ensure SSH PermitEmptyPasswords is disabled
 
-echo "[i] Disabling SSH PermitEmptyPasswords"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^PermitEmptyPasswords" /etc/ssh/sshd_config; then 
-	sed -i 's/^PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+echo "[i] Confirming SSH PermitEmptyPasswords is disabled" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^PermitEmptyPasswords" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'PermitEmptyPasswords no'" | tee -a ./audit_results.txt
+
+var=$(grep "^PermitEmptyPasswords" /etc/ssh/sshd_config)
+
+if [[ "$var" == "PermitEmptyPasswords no" ]]; then
+	echo "[YES] PermitEmptyPasswords is disabled" | tee -a ./audit_results.txt
 else
-    echo "PermitEmptyPasswords no" >> /etc/ssh/sshd_config
+	echo "[NO] PermitEmptyPasswords is NOT disabled" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.10 Ensure SSH PermitUserEnvironment is disabled
 
-echo "[i] Disabling SSH PermitUserEnvironment"
-if grep -q "^PermitUserEnvironment" /etc/ssh/sshd_config; then 
-	sed -i 's/^PermitUserEnvironment.*/PermitUserEnvironment no/' /etc/ssh/sshd_config
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming SSH PermitUserEnvironment is disabled" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^PermitUserEnvironment" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'PermitUserEnvironment no'" | tee -a ./audit_results.txt
+
+var=$(grep "^PermitUserEnvironment" /etc/ssh/sshd_config)
+
+if [[ "$var" == "PermitUserEnvironment no" ]]; then
+	echo "[YES] PermitUserEnvironment is disabled" | tee -a ./audit_results.txt
 else
-    echo "PermitUserEnvironment no" >> /etc/ssh/sshd_config
+	echo "[NO] PermitUserEnvironment is NOT disabled" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.11 Ensure only approved MAC algorithms are used
-echo "[i] Ensuring only approved MAC algorithms are used"
 
-if grep -q "^MACs" /etc/ssh/sshd_config; then 
-	sed -i 's/^MACs.*/MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com/' /etc/ssh/sshd_config
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming only approved MAC algorithms are used" | tee -a ./audit_results.txt
+echo "[i] Getting the list of MAC algorithms: " | tee -a ./audit_results.txt
+
+grep "MACs" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] You will need to manual check the above output and ensure there are no MACs that are NOT also in the following list" | tee -a ./audit_results.txt
+echo "		hmac-sha2-512-etm@openssh.com" | tee -a ./audit_results.txt
+echo "		hmac-sha2-256-etm@openssh.com" | tee -a ./audit_results.txt
+echo "		umac-128-etm@openssh.com" | tee -a ./audit_results.txt
+echo "		hmac-sha2-512" | tee -a ./audit_results.txt
+echo "		hmac-sha2-256" | tee -a ./audit_results.txt
+echo "		umac-128@openssh.com" | tee -a ./audit_results.txt
+
+var=$(grep "MACs" /etc/ssh/sshd_config)
+
+if [[ "$var" == "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com"; then
+	echo "[YES] The MAC list only includes the approved algorithms" | tee -a ./audit_results.txt
 else
-    echo "MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com" >> /etc/ssh/sshd_config
+	echo "[???] The MACs list doesn't match the expected values and needs to be checked manually" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.12 Ensure SSH Idle Timeout Interval is configured
 
-echo "[i] Configuring the SSH Idle Timeout Interval"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^ClientAliveInterval" /etc/ssh/sshd_config; then 
-	sed -i 's/^ClientAliveInterval.*/ClientAliveInterval 300/' /etc/ssh/sshd_config
+echo "[i] Confirming ClientAliveInterval is set at 300" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^ClientAliveInterval" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'ClientAliveInterval 300'" | tee -a ./audit_results.txt
+
+var=$(grep "^ClientAliveInterval" /etc/ssh/sshd_config)
+
+if [[ "$var" == "ClientAliveInterval 300" ]]; then
+	echo "[YES] The ClientAliveInterval is set at 300" | tee -a ./audit_results.txt
 else
-    echo "ClientAliveInterval 300" >> /etc/ssh/sshd_config
+	echo "[NO] The ClientAliveInterval is not set at 300 and should be manually checked" | tee -a ./audit_results.txt
 fi
 
+echo "[i] Confirming ClientAliveCountMax is set at 0" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
 
-if grep -q "^ClientAliveCountMax" /etc/ssh/sshd_config; then 
-	sed -i 's/^ClientAliveCountMax.*/ClientAliveCountMax 0/' /etc/ssh/sshd_config
+grep "^ClientAliveCountMax" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'ClientAliveCountMax 0'" | tee -a ./audit_results.txt
+
+var=$(grep "^ClientAliveCountMax" /etc/ssh/sshd_config)
+
+if [[ "$var" == "ClientAliveCountMax 0" ]]; then
+	echo "[YES] The ClientAliveCountMax is set at 0" | tee -a ./audit_results.txt
 else
-    echo "ClientAliveCountMax 0" >> /etc/ssh/sshd_config
+	echo "[NO] The ClientAliveCountMax is not set at 0" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.13 Ensure SSH LoginGraceTime is set to one minute or less
 
-echo "[i] Setting SSH LoginGraceTime to 1 minute"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^LoginGraceTime" /etc/ssh/sshd_config; then 
-	sed -i 's/^LoginGraceTime.*/LoginGraceTime 60/' /etc/ssh/sshd_config
+echo "[i] Confirming LoginGraceTime is set at 60 seconds" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^LoginGraceTime" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'LoginGraceTime 60'" | tee -a ./audit_results.txt
+
+var=$(grep "^LoginGraceTime" /etc/ssh/sshd_config)
+
+if [[ "$var" == "LoginGraceTime 60" ]]; then
+	echo "[YES] The LoginGraceTime is set at 60 seconds" | tee -a ./audit_results.txt
 else
-    echo "LoginGraceTime 60" >> /etc/ssh/sshd_config
+	echo "[NO] The LoginGraceTime is not set at 60 seconds and should be manually checked" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.14 Ensure SSH access is limited
-# This will need to be manually set by the system administrator as it will be unique per organisation/system
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming that SSH access has been limited" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^AllowUsers" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+grep "^AllowGroups" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+grep "^DenyUsers" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+grep "^DenyGroups" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] You will need to manually check the above output and ensure that some restrictions have been applied and that they are suitably restrictive to limit SSH access" | tee -a ./audit_results.txt
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.2.15 Ensure SSH warning banner is configured
 
-echo "[i] Setting SSH warning banner"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "^Banner" /etc/ssh/sshd_config; then 
-	sed -i 's/^Banner.*/Banner /etc/issue.net/' /etc/ssh/sshd_config
+echo "[i] Confirming SSH warning banner is configured" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/ssh/sshd_config: " | tee -a ./audit_results.txt
+
+grep "^Banner" /etc/ssh/sshd_config | tee -a ./audit_results.txt
+
+echo "[i] The output above should read 'Banner /etc/issue.net'" | tee -a ./audit_results.txt
+
+var=$(grep "^Banner" /etc/ssh/sshd_config)
+
+if [[ "$var" == "Banner /etc/issue.net" ]]; then
+	echo "[YES] The SSH warning banner has been set" | tee -a ./audit_results.txt
 else
-    echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
+	echo "[NO] The SSH warning banner has NOT been set" | tee -a ./audit_results.txt
 fi
 
 #########################################################################################################################################
 
 # 5.3.1 Ensure password creation requirements are configured 
 
-echo "[i] Installing the Privileged Access Management Password Quality module"
+echo "############################################################################" >> ./audit_results.txt
 
-yum install -y libpam-pwquality
+echo "[i] Confirming all the password creation requirements are set in line with the original hardening requirements" | tee -a ./audit_results.txt
+echo "[i] Getting information about the password creation requirements: " | tee -a ./audit_results.txt
 
-echo "[i] Setting password policies to align with CIS guidance"
-echo "[i] If you have different password policy requirements, you will need to set these yourself"
+grep pam_pwquality.so /etc/pam.d/password-auth | tee -a ./audit_results.txt
+grep pam_pwquality.so /etc/pam.d/system-auth | tee -a ./audit_results.txt
+grep ^minlen /etc/security/pwquality.conf | tee -a ./audit_results.txt
+grep ^dcredit /etc/security/pwquality.conf | tee -a ./audit_results.txt
+grep ^lcredit /etc/security/pwquality.conf | tee -a ./audit_results.txt
+grep ^ocredit /etc/security/pwquality.conf | tee -a ./audit_results.txt
+grep ^ucredit /etc/security/pwquality.conf | tee -a ./audit_results.txt
 
-if grep -q "pam_pwquality.so" /etc/pam.d/common-password; then 
-	sed -i 's/.*pam_pwquality.so.*/password requisite pam_pwquality.so retry=3/' /etc/pam.d/common-password
+var=$(grep pam_pwquality.so /etc/pam.d/password-auth | tee -a ./audit_results.txt)
+
+if [[ "$var" == "password requisite pam_pwquality.so try_first_pass retry=3" ]]; then
+	echo "[YES] Passowrd retries are set at 3 for users" | tee -a ./audit_results.txt
 else
-    echo "password requisite pam_pwquality.so retry=3" >> /etc/pam.d/common-password
+	echo "[NO] Passowrd retries are NOT set at 3 for users " | tee -a ./audit_results.txt
 fi
 
-# Set minimum password length to 10 to align with the orgs requirements
+var=$(grep pam_pwquality.so /etc/pam.d/system-auth | tee -a ./audit_results.txt)
 
-if grep -q "^minlen" /etc/security/pwquality.conf; then 
-	sed -i 's/^minlen.*/minlen = 10/' /etc/security/pwquality.conf
+if [[ "$var" == "password requisite pam_pwquality.so try_first_pass retry=3" ]]; then
+	echo "[YES] Passowrd retries are set at 3 for SYSTEM" | tee -a ./audit_results.txt
 else
-    echo "minlen = 10" >> /etc/security/pwquality.conf
+	echo "[NO] Passowrd retries are set at 3 for SYSTEM" | tee -a ./audit_results.txt
 fi
 
-if grep -q "^dcredit" /etc/security/pwquality.conf; then 
-	sed -i 's/^dcredit.*/dcredit = -1/' /etc/security/pwquality.conf
+var=$(grep ^minlen /etc/security/pwquality.conf | tee -a ./audit_results.txt)
+
+if [[ "$var" == "minlen = 10" ]]; then
+	echo "[YES] Minimum password length is set at 10 characters" | tee -a ./audit_results.txt
 else
-    echo "dcredit = -1" >> /etc/security/pwquality.conf
+	echo "[NO] Minimum password length is NOT set at 10 characters" | tee -a ./audit_results.txt
 fi
 
+var=$(grep ^dcredit /etc/security/pwquality.conf | tee -a ./audit_results.txt)
 
-if grep -q "^ucredit" /etc/security/pwquality.conf; then 
-	sed -i 's/^ucredit.*/ucredit = -1/' /etc/security/pwquality.conf
+if [[ "$var" == "dcredit = -1" ]]; then
+	echo "[YES] At least one numeric character is required" | tee -a ./audit_results.txt
 else
-    echo "ucredit = -1" >> /etc/security/pwquality.conf
+	echo "[NO] At least one numeric character is NOT required" | tee -a ./audit_results.txt
 fi
 
+var=$(grep ^lcredit /etc/security/pwquality.conf | tee -a ./audit_results.txt)
 
-if grep -q "^ocredit" /etc/security/pwquality.conf; then 
-	sed -i 's/^ocredit.*/ocredit = -1/' /etc/security/pwquality.conf
+if [[ "$var" == "lcredit = -1" ]]; then
+	echo "[YES] At least 1 lower case character is needed" | tee -a ./audit_results.txt
 else
-    echo "ocredit = -1" >> /etc/security/pwquality.conf
+	echo "[NO] At least 1 lower case character is NOT needed" | tee -a ./audit_results.txt
 fi
 
+var=$(grep ^ocredit /etc/security/pwquality.conf | tee -a ./audit_results.txt)
 
-if grep -q "^lcredit" /etc/security/pwquality.conf; then 
-	sed -i 's/^lcredit.*/lcredit = -1/' /etc/security/pwquality.conf
+if [[ "$var" == "ocredit = -1" ]]; then
+	echo "[YES] At least 1 special character is needed" | tee -a ./audit_results.txt
 else
-    echo "lcredit = -1" >> /etc/security/pwquality.conf
+	echo "[NO] At least 1 special character is NOT needed" | tee -a ./audit_results.txt
 fi
 
+var=$(grep ^ucredit /etc/security/pwquality.conf | tee -a ./audit_results.txt)
+
+if [[ "$var" == "ucredit = -1" ]]; then
+	echo "[YES] At least 1 upper case character is needed" | tee -a ./audit_results.txt
+else
+	echo "[NO] At least 1 upper case character is NOT needed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.3.2 Ensure lockout for failed password attempts is configured 
 
-echo "[i] Configuring lockout for failed password attempts to 5"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "pam_tally2.so" /etc/pam.d/common-auth; then 
-	sed -i 's/.*pam_tally2.so.*/auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900/' /etc/pam.d/common-auth
+echo "[i] Confirming a lockout for failed password attempts is configured" | tee -a ./audit_results.txt
+echo "[i] Getting information about the password lockout configuration: " | tee -a ./audit_results.txt
+
+grep -q "pam_tally2.so" /etc/pam.d/common-auth | tee -a ./audit_results.txt
+
+echo "[i] The output above should indicate show 'deny=5' and 'unlock_time=900' are set" | tee -a ./audit_results.txt
+
+if grep -q "pam_tally2.so" /etc/pam.d/common-auth | grep -q 'auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900'; then 
+	echo "[YES] The lockout is set at 900 seconds after 5 failed attempts, as per the hardening requirements" | tee -a ./audit_results.txt
 else
-    echo "auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
+    echo "[NO] The lockout is NOT set at 900 seconds after 5 failed attempts, as per the hardening requirements" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.3.3 Ensure password reuse is limited
 
-echo "[i] Limiting password reuse to the last 5 passwords"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "pam_pwhistory.so" /etc/pam.d/common-password; then 
-	sed -i 's/.*pam_pwhistory.so.*/password required pam_pwhistory.so remember=5/' /etc/pam.d/common-password
+echo "[i] Confirming password reuse is limited to last 5 passwords" | tee -a ./audit_results.txt
+echo "[i] Getting information about the password reuse configuration: " | tee -a ./audit_results.txt
+
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth | tee -a ./audit_results.txt
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/system-auth | tee -a ./audit_results.txt
+
+echo "[i] The two outputs above should read: " | tee -a ./audit_results.txt
+	echo "		password sufficient pam_unix.so remember=5" | tee -a ./audit_results.txt
+
+var=$(egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth)
+
+if [[ "$var" == "password sufficient pam_unix.so remember=5"; then 
+	echo "[YES] The user password reuse is limited to 5" | tee -a ./audit_results.txt
 else
-    echo "password required pam_pwhistory.so remember=5" >> /etc/pam.d/common-password
+    echo "[NO] The user password reuse is NOT limited to 5" | tee -a ./audit_results.txt
+fi
+
+var=$(egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/system-auth)
+
+if [[ "$var" == "password sufficient pam_unix.so remember=5"; then 
+	echo "[YES] The system password reuse is limited to 5" | tee -a ./audit_results.txt
+else
+    echo "[NO] The system password reuse is NOT limited to 5" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.3.4 Ensure password hashing algorithm is SHA-512
 
-echo "[i] Setting the password hashing algorithm to SHA-512"
+echo "############################################################################" >> ./audit_results.txt
 
-if grep -q "pam_unix.so" /etc/pam.d/common-password; then 
-	sed -i 's/.*pam_unix.so.*/password [success=1 default=ignore] pam_unix.so sha512/' /etc/pam.d/common-password
+echo "[i] Confirming password hashing algorithm is SHA-512" | tee -a ./audit_results.txt
+echo "[i] Getting information about the password hashing algorithm: " | tee -a ./audit_results.txt
+
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth | tee -a ./audit_results.txt
+egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/system-auth | tee -a ./audit_results.txt
+
+echo "[i] The two outputs above should read: " | tee -a ./audit_results.txt
+	echo "		password sufficient pam_unix.so sha512" | tee -a ./audit_results.txt
+
+var=$(egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/password-auth)
+
+if [[ "$var" == "password sufficient pam_unix.so sha512"; then 
+	echo "[YES] The user password hash is SHA-512" | tee -a ./audit_results.txt
 else
-    echo "password [success=1 default=ignore] pam_unix.so sha512" >> /etc/pam.d/common-password
+    echo "[NO] The user password hash is NOT SHA-512" | tee -a ./audit_results.txt
+fi
+
+var=$(egrep '^password\s+sufficient\s+pam_unix.so' /etc/pam.d/system-auth)
+
+if [[ "$var" == "password sufficient pam_unix.so sha512"; then 
+	echo "[YES] The system password hash is SHA-512" | tee -a ./audit_results.txt
+else
+    echo "[NO] The system password hash is NOT SHA-512" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.4.1.1 Ensure password expiration is 365 days or less
 
-# Not setting password expiration as it goes against all the best security guidance
-
-# echo "[i] Setting password expiry at 365 days"
-# if grep -q "PASS_MAX_DAYS" /etc/login.defs; then
-# 	sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS 365/' /etc/login.defs
-# else
-# 	echo "PASS_MAX_DAYS 90" >> /etc/login.defs
-# fi
+# Didn't set password expiration as it goes against all the best security guidance
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.4.1.2 Ensure minimum days between password changes is 7 or more
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "[i] Setting the minimum days between password changes to 7"
 
