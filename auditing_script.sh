@@ -210,9 +210,9 @@ modprobe -n -v squashfs | tee -a ./audit_results.txt
 echo "[!!!] The above result should read 'install /bin/true'.  If not, this control is not applied" | tee -a ./audit_results.txt
 
 if modprobe -n -v squashfs | grep -q 'install /bin/true'; then
-	echo "[YES]" The control is applied correctly" | tee -a ./audit_results.txt
+	echo "[YES] The control is applied correctly" | tee -a ./audit_results.txt
 else
-	echo "[NO]" The control doesn't appear to be applied correctly" | tee -a ./audit_results.txt
+	echo "[NO] The control doesn't appear to be applied correctly" | tee -a ./audit_results.txt
 fi
 
 echo "[i] Confirming the squashfs module is not loaded in the kernel" | tee -a ./audit_results.txt
@@ -220,7 +220,7 @@ echo "[i] Output from the 'lsmod | grep squashfs' command is: " | tee -a ./audit
 
 lsmod | grep squashfs | tee -a ./audit_results.txt
 
-echo "[!!!] The output above should be blank.  If not, the squashfs module is being loaded in the kernel and this control is not applied" | tee -a ./audit_results.txt
+echo "[i] The output above should be blank.  If not, the squashfs module is being loaded in the kernel and this control is not applied" | tee -a ./audit_results.txt
 
 var=$(lsmod | grep squashfs)
 
@@ -241,7 +241,7 @@ echo "[i] Output from the 'modprobe -n -v udf' command is: " | tee -a ./audit_re
 
 modprobe -n -v udf | tee -a ./audit_results.txt
 
-echo "[!!!] The above result should read 'install /bin/true'.  If not, this control is not applied" | tee -a ./audit_results.txt
+echo "[i] The above result should read 'install /bin/true'.  If not, this control is not applied" | tee -a ./audit_results.txt
 
 if modprobe -n -v udf | grep -q 'install /bin/true'; then
 	echo "[YES]" The control is applied correctly" | tee -a ./audit_results.txt
@@ -254,7 +254,7 @@ echo "[i] Output from the 'lsmod | grep udf' command is: " | tee -a ./audit_resu
 
 lsmod | grep udf | tee -a ./audit_results.txt
 
-echo "[!!!] The output above should be blank.  If not, the hfs module is being loaded in the kernel and this control is not applied" | tee -a ./audit_results.txt
+echo "[i] The output above should be blank.  If not, the hfs module is being loaded in the kernel and this control is not applied" | tee -a ./audit_results.txt
 
 var=$(lsmod | grep udf)
 
@@ -275,7 +275,7 @@ echo "1.1.1.8 Ensure mounting of FAT filesystems is disabled"
 
 #modprobe -n -v vfat | tee -a ./audit_results.txt
 
-#echo "[!!!] The above result should read 'install /bin/true'.  If not, this control is not applied" | tee -a ./audit_results.txt
+#echo "[i] The above result should read 'install /bin/true'.  If not, this control is not applied" | tee -a ./audit_results.txt
 
 #if modprobe -n -v vfat | grep -q 'install /bin/true'; then
 #	echo "[YES]" The control is applied correctly" | tee -a ./audit_results.txt
@@ -288,7 +288,7 @@ echo "1.1.1.8 Ensure mounting of FAT filesystems is disabled"
 
 #lsmod | grep vfat | tee -a ./audit_results.txt
 
-#echo "[!!!] The output above should be blank.  If not, the vfat module is being loaded in the kernel and this control is not applied" | tee -a ./audit_results.txt
+#echo "[i] The output above should be blank.  If not, the vfat module is being loaded in the kernel and this control is not applied" | tee -a ./audit_results.txt
 
 #var=$(lsmod | grep vfat)
 
@@ -314,7 +314,7 @@ echo "[i] Output of the 'mount | grep /tmp' command is: " | tee -a ./audit_resul
 
 mount | grep /tmp | tee -a ./audit_results.txt
 
-echo "[!!!] The output above should include 'nosuid, nodev, noexec'.  If not, the control isn't applied" | tee -a ./audit_results.txt
+echo "[i] The output above should include 'nosuid, nodev, noexec'.  If not, the control isn't applied" | tee -a ./audit_results.txt
 
 var=$(mount | grep /tmp)
 
@@ -349,7 +349,7 @@ echo "[i] Output of the 'mount | grep /tmp' command is: " | tee -a ./audit_resul
 
 mount | grep /var/tmp | tee -a ./audit_results.txt
 
-echo "[!!!] The output above should include 'nosuid, nodev, noexec'.  If not, the control isn't applied" | tee -a ./audit_results.txt
+echo "[i] The output above should include 'nosuid, nodev, noexec'.  If not, the control isn't applied" | tee -a ./audit_results.txt
 
 var=$(mount | grep /var/tmp)
 
@@ -1922,112 +1922,112 @@ fi
 
 # 3.4.1 Ensure TCP Wrappers is installed 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming TCP Wrappers is installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm command to confirm package status: " | tee -a ./audit_results.txt
 
+rpm -q tcp_wrappers | tee -a ./audit_results.txt
 
+echo "[i] The above output should provide confirmation of the tcp_wrappers version which is currently installed" | tee -a ./audit_results.txt
 
+var=$(rpm -q tcp_wrappers)
 
+if [[ $var == *"tcp_wrappers-"* ]]; then
+	echo "[YES] TCP Wrappers is installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] TCP Wrappers is NOT installed" | tee -a ./audit_results.txt
+fi
 
+echo "[i] Confirming TCP Wrappers libraries are installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm command to confirm package status: " | tee -a ./audit_results.txt
 
+rpm -q tcp_wrappers-libs | tee -a ./audit_results.txt
 
+echo "[i] The above output should provide confirmation of the tcp_wrappers-libs version which is currently installed" | tee -a ./audit_results.txt
 
+var=$(rpm -q tcp_wrappers-libs)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-echo "[i] Installing TCP Wrappers"
-yum install -y tcp_wrappers
+if [[ $var == *"tcp_wrappers-libs-"* ]]; then
+	echo "[YES] TCP Wrappers libraries are installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] TCP Wrappers libraries are NOT installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.4.2 Ensure /etc/hosts.allow is configured 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Extracting contents of the /etc/hosts.allow file: " | tee -a ./audit_results.txt
 
+cat /etc/hosts.allow | tee -a ./audit_results.txt
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# This control is dependent on the individual organisation so will need to be set manually
-# By default, nothing is in the hosts.allow so when we generate the hosts.deny in the next section, no IP addresses with be permitted to connect with the host
-
-echo "[i] Creating a default hosts.allow file"
-echo "ALL: 192.168.0.0/255.255.0.0" > /etc/hosts.allow
+echo "[i] The above output must be manually audited to ensure only valid hosts are contained in the /etc/hosts.allow file" | tee -a ./audit_results.txt
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.4.3 Ensure /etc/hosts.deny is configured 
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming that a default deny all is set within the /etc/hosts.deny file" | tee -a ./audit_results.txt
+echo "[i] Extracting contents of the /etc/hosts.deny file: " | tee -a ./audit_results.txt
 
+cat /etc/hosts.deny | tee -a ./audit_results.txt
 
+echo "[i] The above output should contain 'ALL: ALL'" | tee -a ./audit_results.txt
 
+var=$(cat /etc/hosts.deny)
 
-
-
-
-
-
-
-
-
-
-echo "[i] The hosts.deny file is being created with a default 'deny all' rule"
-echo "ALL: ALL" >> /etc/hosts.deny
+if [[ "$var" == "ALL: ALL" ]]; then
+	echo "[YES] The hosts.deny is set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] The hosts.deny doesn't have the default deny rule" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 3.4.4 Ensure permissions on /etc/hosts.allow are configured
-echo "[i] Setting the correct permissions for the 'hosts.allow' file"
 
-chown root:root /etc/hosts.allow
-chmod 644 /etc/hosts.allow
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming permissions are set correctly on /etc/hosts.allow" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/hosts.allow | tee -a ./audit_results.txt
+
+echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' permissions should be 644'" | tee -a ./audit_results.txt
+
+var=$(stat /etc/hosts.allow)
+
+if [[ "$var" == "Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] hosts.allow permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] hosts.allow permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
-# 3.4.4 Ensure permissions on /etc/hosts.deny are configured
+# 3.4.5 Ensure permissions on /etc/hosts.deny are configured
 
-echo "[i] Setting the correct permissions for the 'hosts.deny' file"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/hosts.deny
-chmod 644 /etc/hosts.deny
+echo "[i] Confirming permissions are set correctly on /etc/hosts.deny" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/hosts.deny | tee -a ./audit_results.txt
+
+echo "[i] In the above output, the Uid and Gid must both be '0' and 'root' and 'access' permissions should be 644'" | tee -a ./audit_results.txt
+
+var=$(stat /etc/hosts.deny)
+
+if [[ "$var" == "Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] hosts.deny permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] hosts.deny permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
@@ -2036,85 +2036,257 @@ chmod 644 /etc/hosts.deny
 # 3.6.3 Ensure loopback traffic is configured 
 # 3.6.5 Ensure firewall rules exist for all open ports 
 
-echo "[i] Installing iptables"
+echo "############################################################################" >> ./audit_results.txt
 
-yum install -y iptables
+echo "[i] Confirming iptables is installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm command to confirm package status: " | tee -a ./audit_results.txt
 
-echo "[i] Flushing iptable rules"
+rpm -q iptables | tee -a ./audit_results.txt
 
-iptables -F
+echo "[i] The above output should provide confirmation of the iptables version which is currently installed" | tee -a ./audit_results.txt
 
-echo "[i] Adding default deny firewall policy"
+var=$(rpm -q iptables)
 
-iptables -P INPUT DROP
-iptables -P OUTPUT DROP 
-iptables -P FORWARD DROP
+if [[ $var == *"iptables-"* ]]; then
+	echo "[YES] iptables is installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] iptables is NOT installed" | tee -a ./audit_results.txt
+fi
 
-echo "[i] Configuring loopback traffic rules within firewall policy"
+echo "[i] Confirming default deny firewall policy is configured" | tee -a ./audit_results.txt
 
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
-iptables -A INPUT -s 127.0.0.0/8 -j DROP
+iptables -L | tee -a ./audit_results.txt
 
-echo "[i] Opening inbound ssh (tcp port 22) connections within the firewall policy" 
+echo "[i] The above output should have a policy of DROP for the INPUT, FORWARD & OUTPUT chains" | tee -a ./audit_results.txt
 
-iptables -A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
+if iptables -L | grep -q 'Chain INPUT (policy DROP)'; then
+	echo "[YES] The INPUT chain policy is correctly set to DROP" | tee -a ./audit_results.txt
+else
+	echo "[NO] The INPUT chain policy doesn't appear to be set to DROP" | tee -a ./audit_results.txt
+fi
 
-echo "[i] All additional rules will need to be added manually if required"
+if iptables -L | grep -q 'Chain FORWARD (policy DROP)'; then
+	echo "[YES] The FORWARD chain policy is correctly set to DROP" | tee -a ./audit_results.txt
+else
+	echo "[NO] The FORWARD chain policy doesn't appear to be set to DROP" | tee -a ./audit_results.txt
+fi
+
+if iptables -L | grep -q 'Chain OUTPUT (policy DROP)'; then
+	echo "[YES] The OUTPUT chain policy is correctly set to DROP" | tee -a ./audit_results.txt
+else
+	echo "[NO] The OUTPUT chain policy doesn't appear to be set to DROP" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming loopback traffic is configured" | tee -a ./audit_results.txt
+echo "[i] Checking INPUT rules: "
+
+iptables -L INPUT -v -n | tee -a ./audit_results.txt
+
+echo "[i] The output must include the following lines (in order): " | tee -a ./audit_results.txt
+echo "		0 0 ACCEPT all -- lo * 	0.0.0.0/0 	0.0.0.0/0" | tee -a ./audit_results.txt
+echo "		0 0 DROP all -- * * 127.0.0.0/8 	0.0.0.0/0" | tee -a ./audit_results.txt
+
+if iptables -L INPUT -v -n | grep -q '0 0 ACCEPT all -- lo * 0.0.0.0/0 0.0.0.0/0'; then
+	echo "[YES] The ACCEPT rule is included in the INPUT ruleset" | tee -a ./audit_results.txt
+else
+	echo "[NO] The ACCEPT rule isn't present in the INPUT ruleset" | tee -a ./audit_results.txt
+fi
+
+if iptables -L INPUT -v -n | grep -q '0 0 DROP all -- * * 127.0.0.0/8 0.0.0.0/0'; then
+	echo "[YES] The DENY rule is included in the INPUT ruleset" | tee -a ./audit_results.txt
+else
+	echo "[NO] The DENY rule isn't present in the INPUT ruleset" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Checking OUTPUT rules: " | tee -a ./audit_results.txt
+
+iptables -L OUTPUT -v -n | tee -a ./audit_results.txt
+
+echo "[i] The output above must include the following line: " | tee -a ./audit_results.txt
+echo "		0 0 ACCEPT all -- * lo 0.0.0.0/0 0.0.0.0/0" | tee -a ./audit_results.txt
+
+if iptables -L OUTPUT -v -n | grep -q '0 0 ACCEPT all -- * lo 0.0.0.0/0 0.0.0.0/0'; then
+	echo "[YES] The ACCEPT rule is included in the OUTPUT ruleset" | tee -a ./audit_results.txt
+else
+	echo "[NO] The ACCEPT rule isn't present in the OUTPUT ruleset" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming firewall rules exist for all open ports" | tee -a ./audit_results.txt
+echo "[i] The following ports are open: " | tee -a ./audit_results.txt
+
+netstat -ln | tee -a ./audit_results.txt
+
+echo "[i] The following firewall rules exist: " | tee -a ./audit_results.txt
+
+iptables -L INPUT -v -n | tee -a ./audit_results.txt
+
+echo "[i] You will need to manually check the open ports (for all ports listening on non-localhost addresses) and confirm there is a firewall rule in place"  | tee -a ./audit_results.txt
+
 
 #########################################################################################################################################
 
 # 4.2.1.1 Ensure rsyslog Service is enabled 
-# 4.2.3 Ensure rsyslog or syslog-ng is installed
 
-yum install -y rsyslog
-yum install -y syslog-ng
+echo "############################################################################" >> ./audit_results.txt
 
-echo "[i] Enabling rsyslog service"
-systemctl enable rsyslog
+echo "[i] Confirming rsyslog service is enabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled rsyslog' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled rsyslog | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is enabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled rsyslog)
+
+if [[ "$var" == "enabled" ]]; then
+	echo "[YES] rsyslog service is enabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] rsyslog service is NOT enabled" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 4.2.1.3 Ensure rsyslog default file permissions configured 
 
-echo "[i] Configuring rsyslog default file permissions"
-if grep -q "^$FileCreateMode" /etc/sysctl.conf; then 
-	sed -i 's/^$FileCreateMode.*/$FileCreateMode 0640/' /etc/sysctl.conf
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming rsyslog default file permission are configured" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/rsyslog.conf: " | tee -a ./audit_results.txt
+
+grep ^\$FileCreateMode /etc/rsyslog.conf | tee -a ./audit_results.txt
+
+echo "[i] The output above should have $FileCreateMode set at 0640" | tee -a ./audit_results.txt
+
+if grep ^\$FileCreateMode /etc/rsyslog.conf | grep -q '$FileCreateMode 0640'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
 else
-    echo "$FileCreateMode 0640" >> /etc/sysctl.conf
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host server 
-# This requires the system administrator to manually add the url of a log host
-
-# As these are non-networked standalone machines, a remote logging server isn't needed 
+# Not including in the original hardening
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 4.2.2.1 Ensure syslog-ng service is enabled
 
-echo "[i] Enabling syslog-ng service"
-systemctl enable syslog-ng
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming syslog-ng service is enabled" | tee -a ./audit_results.txt
+echo "[i] Running 'systemctl is-enabled syslog-ng' command: " | tee -a ./audit_results.txt
+
+systemctl is-enabled syslog-ng | tee -a ./audit_results.txt
+
+echo "[i] Output from the above command should state that it is enabled" | tee -a ./audit_results.txt
+
+var=$(systemctl is-enabled syslog-ng)
+
+if [[ "$var" == "enabled" ]]; then
+	echo "[YES] syslog-ng service is enabled" | tee -a ./audit_results.txt
+else
+	echo "[NO] syslog-ng service is NOT enabled" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 4.2.2.3 Ensure syslog-ng default file permissions configured
 
-echo "[i] Configuring the syslog-ng default file permissions"
-if grep -q "^options {" /etc/syslog-ng/syslog-ng.conf; then 
-	sed -i 's/^options {.*/options { chain_hostnames(off); flush_lines(0); perm(0640); stats_freq(3600); threaded(yes); };/' /etc/syslog-ng/syslog-ng.conf
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming syslog-ng default file permission are configured" | tee -a ./audit_results.txt
+echo "[i] Getting information from /etc/syslog-ng/syslog-ng.conf: " | tee -a ./audit_results.txt
+
+grep ^options /etc/syslog-ng/syslog-ng.conf | tee -a ./audit_results.txt
+
+echo "[i] The output above should have the perm option set at 0640" | tee -a ./audit_results.txt
+
+if grep ^options /etc/syslog-ng/syslog-ng.conf | grep -q 'options { chain_hostnames(off); flush_lines(0); perm(0640); stats_freq(3600); threaded(yes); };'; then
+	echo "[YES] File permissions are set correctly" | tee -a ./audit_results.txt
 else
-	echo "options { chain_hostnames(off); flush_lines(0); perm(0640); stats_freq(3600); threaded(yes); };" >> /etc/syslog-ng/syslog-ng.conf
+	echo "[NO] File permissions don't appear to be set correctly" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 4.2.3 Ensure rsyslog or syslog-ng is installed
-# The installation was already carried out during the '4.2.1.1' control above
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming rsyslog is installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm command to confirm package status: " | tee -a ./audit_results.txt
+
+rpm -q rsyslog | tee -a ./audit_results.txt
+
+echo "[i] The above output should provide confirmation of the rsyslog version which is currently installed" | tee -a ./audit_results.txt
+
+var=$(rpm -q rsyslog)
+
+if [[ $var == *"rsyslog-"* ]]; then
+	echo "[YES] rsyslog is installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] rsyslog is NOT installed" | tee -a ./audit_results.txt
+fi
+
+echo "[i] Confirming syslog-ng is installed" | tee -a ./audit_results.txt
+echo "[i] Running rpm command to confirm package status: " | tee -a ./audit_results.txt
+
+rpm -q syslog-ng | tee -a ./audit_results.txt
+
+echo "[i] The above output should provide confirmation of the syslog-ng version which is currently installed" | tee -a ./audit_results.txt
+
+var=$(rpm -q syslog-ng)
+
+if [[ $var == *"syslog-ng-"* ]]; then
+	echo "[YES] syslog-ng is installed" | tee -a ./audit_results.txt
+else
+	echo "[NO] syslog-ng is NOT installed" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 4.2.4 Ensure permissions on all logfiles are configured 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "[i] Setting correct permissions on all log files"
 
@@ -2124,11 +2296,38 @@ find /var/log -type f -exec chmod g-wx,o-rwx {} +
 
 # 5.1.1 Ensure cron daemon is enabled
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 echo "[i] Enabling the cron daemon"
 systemctl enable cron
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 # 5.1.2 Ensure permissions on /etc/crontab are configured
+
+
+
+
+
+
+
+
+
+
+
+
 
 echo "[i] Setting the correct permissions on /etc/crontab"
 
@@ -2573,8 +2772,7 @@ chmod 644 /etc/passwd
 
 echo "[i] Setting correct permissions on /etc/shadow"
 
-chown root:root /etc/shadow
-chmod 000 /etc/shadow
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
