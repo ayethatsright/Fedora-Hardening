@@ -2937,244 +2937,851 @@ fi
 
 # 5.4.1.1 Ensure password expiration is 365 days or less
 
-# Didn't set password expiration as it goes against all the best security guidance
+# Didn't set password expiration as it goes against all the best security guidance.  However, i'll still audit this to see if it has been enabled!
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Because mandatory, arbitrary password changes are a security anti-pattern, the hardening script hasn't employed this control" | tee -a ./audit_results.txt
+echo "[i] However, auditing will still be done against the control to identify if enforced password changes have been applied so that advice can be given about the dangers of doing this" | tee -a ./audit_results.txt
+
+echo "[i] Confirming status of arbitrary password changes: " | tee -a ./audit_results.txt
+
+grep PASS_MAX_DAYS /etc/login.defs | tee -a ./audit_results.txt
+
+echo "[i] The above output should read 'PASS_MAX_DAYS 0'" | tee -a ./audit_results.txt
+
+var=$(grep PASS_MAX_DAYS /etc/login)
+
+if [[ "$var" == "PASS_MAX_DAYS 0" ]]; then
+	echo "[YES] Arbitrary password changes are not being enforced" | tee -a ./audit_results.txt
+else
+	echo "[NO] Arbitrary password changes ARE being employed.  Further guidance should be sought" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.4.1.2 Ensure minimum days between password changes is 7 or more
 
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming minimum days between password changes is 7" | tee -a ./audit_results.txt
+echo "[i] Getting information about the minimum password change period: " | tee -a ./audit_results.txt
 
+grep PASS_MIN_DAYS /etc/login.defs | tee -a ./audit_results.txt
 
+echo "[i] The outputs above should read 'PASS_MIN_DAYS 7'" | tee -a ./audit_results.txt
+	
+var=$(grep PASS_MIN_DAYS /etc/login.defs)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-echo "[i] Setting the minimum days between password changes to 7"
-
-if grep -q "PASS_MIN_DAYS" /etc/login.defs; then
-	sed -i 's/^PASS_MIN_DAYS.*/PASS_MIN_DAYS 7/' /etc/login.defs
+if [[ "$var" == "PASS_MIN_DAYS 7"; then 
+	echo "[YES] The minimum change period is 7 days" | tee -a ./audit_results.txt
 else
-	echo "PASS_MIN_DAYS 7" >> /etc/login.defs
+    echo "[NO] The minimum change period is not 7 days" | tee -a ./audit_results.txt
 fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.4.1.3 Ensure password expiration warning days is 7 or more
 
-# Not needed as I haven't set passwords to expire arbitrarily 
-
-# echo "[i] Setting password expiration warning to 7 days"
-# if grep -q "PASS_WARN_AGE" /etc/login.defs; then
-# 	sed -i 's/^PASS_WARN_AGE.*/PASS_WARN_AGE 7/' /etc/login.defs
-# else
-# 	echo "PASS_WARN_AGE 7" >> /etc/login.defs
-# fi
+# Arbitrary password changes have not been applied so this doesn't require any auditing
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.4.1.4 Ensure inactive password lock is 30 days or less
 
-echo "[i] Locking passwords after 30 days of inactivity"
+echo "############################################################################" >> ./audit_results.txt
 
-useradd -D -f 30
+echo "[i] Confirming inactive password lock is 30 days" | tee -a ./audit_results.txt
+echo "[i] Getting information about the password lock period: " | tee -a ./audit_results.txt
+
+useradd -D | grep INACTIVE | tee -a ./audit_results.txt
+
+echo "[i] The outputs above should read 'INACTIVE=30'" | tee -a ./audit_results.txt
+	
+var=$(useradd -D | grep INACTIVE)
+
+if [[ "$var" == "INACTIVE=30"; then 
+	echo "[YES] The inactive password lock period is set at 30 days" | tee -a ./audit_results.txt
+else
+    echo "[NO] The inactive password lock period is NOT set at 30 days" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 5.4.1.5 Ensure all users last password change date is in the past
 
-# Not needed as I aren't expiring passwords
-
-# This is a manual task.  Run the following commands and confirm for each user:
-# cat/etc/shadow | cut -d: -f1
-# <list of users>
-# chage --list <user>
-# Last Change			: <date>
+# Auditing is not required as arbitrary password changes are not being applied
 
 #########################################################################################################################################
 
 # 5.4.2 Ensure system accounts are non-login
 
-# Not needed as there are no non-default service accounts with these machines
+echo "############################################################################" >> ./audit_results.txt
 
-# This is a manual task.
-# Run the following audit task to identify users which have interactive login privs which shouldn't:
+echo "[i] Confirming system accounts are non-login" | tee -a ./audit_results.txt
+echo "[i] Getting account information: " | tee -a ./audit_results.txt
 
-# egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/usr/sbin/nologin" && $7!="/bin/false") {print}'
+egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/sbin/nologin" && $7!="/bin/false") {print}' | tee -a ./audit_results.txt
 
-# for user in `awk -F: '($1!="root" && $3 < 1000) {print $1 }' /etc/passwd`; do passwd -S $user | awk -F ' ' '($2!="L") {print $1}'; done
+echo "[i] The output above should be blank.  If not, system accounts can login" | tee -a ./audit_results.txt
 
-# To remediate, set the shell for all necessary accounts identified by the audit script to /usr/sbin/nologin by running the following command:
+var=$(egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/sbin/nologin" && $7!="/bin/false") {print}')
 
-# usermod -s /usr/sbin/nologin <user>
-# passwd -l <user>
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore the control is applied" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore the control is NOT applied" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 5.4.3 Ensure default group for the root account is GID 0
 
-echo "[i] Setting the default group for root to GID 0"
-usermod -g 0 root
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming default group for the root account is GID 0" | tee -a ./audit_results.txt
+echo "[i] Getting GID info for the root account: " | tee -a ./audit_results.txt
+
+grep "^root:" /etc/passwd | cut -f4 -d: | tee -a ./audit_results.txt
+
+echo "[i] The output above should be 0" | tee -a ./audit_results.txt
+
+var=$(grep "^root:" /etc/passwd | cut -f4 -d:)
+
+if [[ "$var" == "0" ]; then
+	echo "[YES] The default group for root is 0" | tee -a ./audit_results.txt
+else
+	echo "[NO] The default group for root is NOT 0" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 5.4.4 Ensure default user umask is 027 or more restrictive
 
-echo "[i] Setting default user umask to 027"
+echo "############################################################################" >> ./audit_results.txt
 
-umask 027
+echo "[i] Ensuring default umask is 027" | tee -a ./audit_results.txt
+echo "[i] Getting umask info: " | tee -a ./audit_results.txt
+
+grep "umask" /etc/bashrc | tee -a ./audit_results.txt
+
+echo "[i] The output above should be 'umask 027" | tee -a ./audit_results.txt
+
+var=$(grep "umask" /etc/bashrc)
+
+if [[ "$var" == "umask 027" ]; then
+	echo "[YES] The default umask is 027" | tee -a ./audit_results.txt
+else
+	echo "[NO] The default umask is NOT 027" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 5.6 Ensure access to the su command is restricted
 
-echo "[i] Restricting access to the su command"
+# 5.4.4 Ensure default user umask is 027 or more restrictive
 
-if grep -q "pam_wheel.so" /etc/pam.d/su; then
-	sed -i 's/.*pam_wheel.so.*/auth required pam_wheel.so/' /etc/pam.d/su
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring access to the su command is restricted" | tee -a ./audit_results.txt
+echo "[i] Getting wheel info: " | tee -a ./audit_results.txt
+
+grep pam_wheel.so /etc/pam.d/su | tee -a ./audit_results.txt
+
+echo "[i] The output above should be 'auth required pam_wheel.so use_uid'" | tee -a ./audit_results.txt
+
+var=$(grep pam_wheel.so /etc/pam.d/su)
+
+if [[ "$var" == "auth required pam_wheel.so use_uid" ]; then
+	echo "[YES] Only users in the 'wheel' group can evoke su" | tee -a ./audit_results.txt
 else
-	echo "auth required pam_wheel.so" >> /etc/pam.d/su
+	echo "[NO] su is not restricted to just users in the 'wheel' group" | tee -a ./audit_results.txt
 fi
 
-# An administrator will need to create a comma separated list of users in the sudo statement in the /etc/group file:
-# sudo:x:10:root,<user list>
+echo "[i] Checking which users are in the 'wheel' group and can therefore evoke su" | tee -a ./audit_results.txt
+echo "[i] Users in the wheel group are: " | tee -a ./audit_results.txt
+
+grep wheel /etc/group | tee -a ./audit_results.txt
+
+echo "[i] Manually review the above user list and ensure there are no users in the wheel group who shouldn't have su privileges" | tee -a ./audit_results.txt
 
 #########################################################################################################################################
 
 # 6.1.2 Ensure permissions on /etc/passwd are configured
 
-echo "[i] Setting correct permissions on /etc/passwd"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/passwd
-chmod 644 /etc/passwd
+echo "[i] Confirming permissions are set correctly on /etc/passwd" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/passwd | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)'" | tee -a ./audit_results.txt
+
+var=$(stat /etc/passwd)
+
+if [[ "$var" == "Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/passwd permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/passwd permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.3 Ensure permissions on /etc/shadow are configured 
 
-echo "[i] Setting correct permissions on /etc/shadow"
+echo "############################################################################" >> ./audit_results.txt
 
+echo "[i] Confirming permissions are set correctly on /etc/shadow" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
 
+stat /etc/shadow | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" | tee -a ./audit_results.txt
+
+var=$(stat /etc/shadow)
+
+if [[ "$var" == "Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/shadow permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/shadow permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.4 Ensure permissions on /etc/group are configured
 
-echo "[i] Setting correct permissions on /etc/group"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/group
-chmod 644 /etc/group
+echo "[i] Confirming permissions are set correctly on /etc/group" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/group | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)'" | tee -a ./audit_results.txt
+
+var=$(stat /etc/group)
+
+if [[ "$var" == "Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/group permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/group permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.5 Ensure permissions on /etc/gshadow are configured 
 
-echo "[i] Setting correct permissions on /etc/gshadow"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/gshadow
-chmod 000 /etc/gshadow
+echo "[i] Confirming permissions are set correctly on /etc/gshadow" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/gshadow | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" | tee -a ./audit_results.txt
+
+var=$(stat /etc/gshadow)
+
+if [[ "$var" == "Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/gshadow permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/gshadow permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.6 Ensure permission on /etc/passwd- are configured 
 
-echo "[i] Setting correct permissions on /etc/passwd-"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/passwd-
-chmod u-x,go-wx /etc/passwd-
+echo "[i] Confirming permissions are set correctly on /etc/passwd-" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/passwd- | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0644/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)" | tee -a ./audit_results.txt
+
+var=$(stat /etc/passwd-)
+
+if [[ "$var" == "Access: (0644/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/passwd- permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/passwd- permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.7 Ensure permissions on /etc/shadow- are configured 
 
-echo "[i] Setting correct permissions on /etc/shadow-"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/shadow-
-chmod 000 /etc/shadow-
+echo "[i] Confirming permissions are set correctly on /etc/shadow-" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/shadow- | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" | tee -a ./audit_results.txt
+
+var=$(stat /etc/shadow-)
+
+if [[ "$var" == "Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/shadow- permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/shadow- permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.8 Ensure permissions on /etc/group- are configured
 
-echo "[i] Setting correct permissions on /etc/group-"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/group-
-chmod u-x,go-wx /etc/group-
+echo "[i] Confirming permissions are set correctly on /etc/group-" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/group- | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0644/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)" | tee -a ./audit_results.txt
+
+var=$(stat /etc/group-)
+
+if [[ "$var" == "Access: (0644/-rw-------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/group- permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/group- permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 
 # 6.1.9 Ensure permissions on /etc/gshadow- are configured
 
-echo "[i] Setting correct permissions on /etc/gshadow-"
+echo "############################################################################" >> ./audit_results.txt
 
-chown root:root /etc/gshadow-
-chmod 000 /etc/gshadow-
+echo "[i] Confirming permissions are set correctly on /etc/gshadow-" | tee -a ./audit_results.txt
+echo "[i] Output of the 'stat' command is: " | tee -a ./audit_results.txt
+
+stat /etc/gshadow- | tee -a ./audit_results.txt
+
+echo "[i] The above output should be 'Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" | tee -a ./audit_results.txt
+
+var=$(stat /etc/gshadow-)
+
+if [[ "$var" == "Access: (0000/----------) Uid: ( 0/ root) Gid: ( 0/ root)" ]]; then
+	echo "[YES] /etc/gshadow- permissions appear to be set correctly" | tee -a ./audit_results.txt
+else
+	echo "[NO] /etc/gshadow- permissions do NOT appear to be set correctly" | tee -a ./audit_results.txt
+fi
 
 #########################################################################################################################################
 
 # 6.1.10 Ensure no world writable files 
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming no world writable files exist" | tee -a ./audit_results.txt
+echo "[i] Getting list of world writable files: " | tee -a ./audit_results.txt
+
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -0002 | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required to change permissions on any file identified" | tee -a ./audit_results.txt
+
+var=$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -0002)
+
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore no world writable files exist" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore remediation is required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.1.11 Ensure no unowned files or directories exist
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming no unowned files or directories exist" | tee -a ./audit_results.txt
+echo "[i] Getting list of unowned files and directories: " | tee -a ./audit_results.txt
+
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required to change permissions on any files or directories identified" | tee -a ./audit_results.txt
+
+var=$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser)
+
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore no unowned files or directories exist" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore remediation is required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.1.12 Ensure no ungrouped files or directories exist 
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Confirming no ungrouped files or directories exist" | tee -a ./audit_results.txt
+echo "[i] Getting list of ungrouped files and directories: " | tee -a ./audit_results.txt
+
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nogroup | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required" | tee -a ./audit_results.txt
+
+var=$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nogroup)
+
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore no ungrouped files or directories exist" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore remediation is required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.1 Ensure password fields are not empty
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring password fields are not empty" | tee -a ./audit_results.txt
+echo "[i] Getting password fields from /etc/shadow: " | tee -a ./audit_results.txt
+
+cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}' | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required on all usernames listed" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.2 Ensure no legacy "+" entries exist in /etc/passwd
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no legacy '+' entries exist in /etc/passwd" | tee -a ./audit_results.txt
+echo "[i] Getting contents of /etc/passwd: " | tee -a ./audit_results.txt
+
+grep '^\+:' /etc/passwd | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required" | tee -a ./audit_results.txt
+
+var=$(grep '^\+:' /etc/passwd)
+
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore no legacy '+' entries exist in /etc/passwd" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore remediation is required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.3 Ensure no legacy "+" entries exist in /etc/shadow
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no legacy '+' entries exist in /etc/shadow" | tee -a ./audit_results.txt
+echo "[i] Getting contents of /etc/shadow: " | tee -a ./audit_results.txt
+
+grep '^\+:' /etc/shadow | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required" | tee -a ./audit_results.txt
+
+var=$(grep '^\+:' /etc/shadow)
+
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore no legacy '+' entries exist in /etc/shadow" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore remediation is required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.4 Ensure no legacy "+" entries exist in /etc/group
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no legacy '+' entries exist in /etc/group" | tee -a ./audit_results.txt
+echo "[i] Getting contents of /etc/group: " | tee -a ./audit_results.txt
+
+grep '^\+:' /etc/group | tee -a ./audit_results.txt
+
+echo "[i] The output above should be blank. If not, remediation will be required" | tee -a ./audit_results.txt
+
+var=$(grep '^\+:' /etc/group)
+
+if [ -z "$var" ]; then
+	echo "[YES] Output is blank, therefore no legacy '+' entries exist in /etc/group" | tee -a ./audit_results.txt
+else
+	echo "[NO] Output is NOT blank, therefore remediation is required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.5 Ensure root is the only UID 0 account
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring root is the only UID 0 account" | tee -a ./audit_results.txt
+echo "[i] Getting list of all accounts with UID 0: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | awk -F: '($3 == 0) { print $1 }' | tee -a ./audit_results.txt
+
+echo "[i] The output above should only include 'root' and no other accounts" | tee -a ./audit_results.txt
+
+var=$(cat /etc/passwd | awk -F: '($3 == 0) { print $1 }')
+
+if [[ "$var" == "root" ]; then
+	echo "[YES] root is the only account with UID 0" | tee -a ./audit_results.txt
+else
+	echo "[NO] There are more accounts with UID 0 than just root.  Remediation will be required" | tee -a ./audit_results.txt
+fi
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.6 Ensure root PATH integrity
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring root PATH integrity" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+if [ "`echo $PATH | grep ::`" != "" ]; then
+	echo "Empty Directory in PATH (::)" | tee -a ./audit_results.txt
+fi 
+
+if [ "`echo $PATH | grep :$`" != "" ]; then
+	echo "Trailing : in PATH"  | tee -a ./audit_results.txt
+fi
+
+p=`echo $PATH | sed -e 's/::/:/' -e 's/:$//' -e 's/:/ /g'`
+set -- $p 
+while [ "$1" != "" ]; do 
+	if [ "$1" = "." ]; then 
+		echo "PATH contains ." | tee -a ./audit_results.txt
+		shift 
+		continue 
+	fi 
+	if [ -d $1 ]; then 
+		dirperm=`ls -ldH $1 | cut -f1 -d" "` 
+		if [ `echo $dirperm | cut -c6` != "-" ]; then 
+			echo "Group Write permission set on directory $1" | tee -a ./audit_results.txt
+		fi 
+		if [ `echo $dirperm | cut -c9` != "-" ]; then 
+			echo "Other Write permission set on directory $1" | tee -a ./audit_results.txt
+		fi 
+		dirown=`ls -ldH $1 | awk '{print $3}'` 
+		if [ "$dirown" != "root" ] ; then 
+			echo $1 is not owned by root  | tee -a ./audit_results.txt
+		fi
+	else
+		echo $1 is not a directory | tee -a ./audit_results.txt
+	fi
+	shift
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.7 Ensure all users' home directories exist
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring all users' home directories exist" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." | tee -a ./audit_results.txt
+	fi
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.8 Ensure all users' home directories permissions are 750 or more restrictive
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring all users' home directories permissions are 750 or more restrictive" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." | tee -a ./audit_results.txt
+	else 
+		dirperm=`ls -ld $dir | cut -f1 -d" "` 
+		if [ `echo $dirperm | cut -c6` != "-" ]; then 
+			echo "Group Write permission set on the home directory ($dir) of user $user" | tee -a ./audit_results.txt
+		fi 
+		if [ `echo $dirperm | cut -c8` != "-" ]; then 
+			echo "Other Read permission set on the home directory ($dir) of user $user" | tee -a ./audit_results.txt
+		fi 
+		if [ `echo $dirperm | cut -c9` != "-" ]; then 
+			echo "Other Write permission set on the home directory ($dir) of user $user" | tee -a ./audit_results.txt
+		fi 
+		if [ `echo $dirperm | cut -c10` != "-" ]; then 
+			echo "Other Execute permission set on the home directory ($dir) of user $user" | tee -a ./audit_results.txt
+		fi 
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.9 Ensure users own their home directories
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring all users' own their home directories" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." | tee -a ./audit_results.txt
+	else 
+		owner=$(stat -L -c "%U" "$dir") 
+		if [ "$owner" != "$user" ]; then 
+			echo "The home directory ($dir) of user $user is owned by $owner." | tee -a ./audit_results.txt
+		fi 
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.10 Ensure users' dot files are not group or world writable
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring users' dot files are not group or world writable" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." tee -a ./audit_results.txt
+	else 
+		for file in $dir/.[A-Za-z0-9]*; do 
+			if [ ! -h "$file" -a -f "$file" ]; then 
+				fileperm=`ls -ld $file | cut -f1 -d" "` 
+				if [ `echo $fileperm | cut -c6` != "-" ]; then 
+					echo "Group Write permission set on file $file" tee -a ./audit_results.txt
+				fi 
+				if [ `echo $fileperm | cut -c9` != "-" ]; then 
+					echo "Other Write permission set on file $file" tee -a ./audit_results.txt
+				fi 
+			fi 
+		done 
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.11 Ensure no users have .forward files
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no users have .forward files " | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist."  tee -a ./audit_results.txt
+	else 
+		if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then 
+			echo ".forward file $dir/.forward exists"  tee -a ./audit_results.txt
+		fi 
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.12 Ensure no users have .netrc files
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no users have .netrc files " | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." | tee -a ./audit_results.txt
+	else 
+		if [ ! -h "$dir/.netrc" -a -f "$dir/.netrc" ]; then 
+			echo ".netrc file $dir/.netrc exists" | tee -a ./audit_results.txt
+		fi 
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.13 Ensure users' .netrc Files are not group or world accessible
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring users .netrc files are not group or world accessible" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." 
+	else 
+		for file in $dir/.netrc; do 
+			if [ ! -h "$file" -a -f "$file" ]; then 
+				fileperm=`ls -ld $file | cut -f1 -d" "` 
+				if [ `echo $fileperm | cut -c5` != "-" ]; then 
+					echo "Group Read set on $file" | tee -a ./audit_results.txt
+				fi 
+				if [ `echo $fileperm | cut -c6` != "-" ]; then 
+					echo "Group Write set on $file" | tee -a ./audit_results.txt
+				fi 
+				if [ `echo $fileperm | cut -c7` != "-" ]; then 
+					echo "Group Execute set on $file" | tee -a ./audit_results.txt
+				fi 
+				if [ `echo $fileperm | cut -c8` != "-" ]; then 
+					echo "Other Read set on $file" | tee -a ./audit_results.txt
+				fi 
+				if [ `echo $fileperm | cut -c9` != "-" ]; then 
+					echo "Other Write set on $file" | tee -a ./audit_results.txt
+				fi
+				if [ `echo $fileperm | cut -c10` != "-" ]; then 
+					echo "Other Execute set on $file" | tee -a ./audit_results.txt
+				fi
+			fi 
+		done 
+	fi
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.14 Ensure no users have .rhosts files
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no users have .rhosts files" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | egrep -v '^(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin" && $7 != "/bin/false") { print $1 " " $6 }' | while read user dir; do 
+	if [ ! -d "$dir" ]; then 
+		echo "The home directory ($dir) of user $user does not exist." | tee -a ./audit_results.txt
+	else 
+		for file in $dir/.rhosts; do 
+			if [ ! -h "$file" -a -f "$file" ]; then 
+				echo ".rhosts file in $dir" | tee -a ./audit_results.txt
+			fi 
+		done 
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.15 Ensure all groups in /etc/passwd exist in /etc/group
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring all groups in /etc/passwd exist in /etc/group" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+for i in $(cut -s -d: -f4 /etc/passwd | sort -u ); do 
+	grep -q -P "^.*?:[^:]*:$i:" /etc/group 
+	if [ $? -ne 0 ]; then 
+		echo "Group $i is referenced by /etc/passwd but does not exist in /etc/group" | tee -a ./audit_results.txt
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.16 Ensure no duplicate UIDs exist
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no duplicate UIDs exist" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | cut -f3 -d":" | sort -n | uniq -c | while read x ; do 
+	[ -z "${x}" ] && break 
+	set - $x 
+	if [ $1 -gt 1 ]; then 
+		users=`awk -F: '($3 == n) { print $1 }' n=$2 /etc/passwd | xargs` 
+		echo "Duplicate UID ($2): ${users}" | tee -a ./audit_results.txt
+	fi
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.17 Ensure no duplicate GIDs exist
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no duplicate GIDs exist" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/group | cut -f3 -d":" | sort -n | uniq -c | while read x ; do 
+	[ -z "${x}" ] && break 
+	set - $x 
+	if [ $1 -gt 1 ]; then 
+		groups=`awk -F: '($3 == n) { print $1 }' n=$2 /etc/group | xargs` 
+		echo "Duplicate GID ($2): ${groups}" | tee -a ./audit_results.txt 
+	fi
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.18 Ensure no duplicate user names exist
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no duplicate user names exist" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/passwd | cut -f1 -d":" | sort -n | uniq -c | while read x ; do 
+	[ -z "${x}" ] && break 
+	set - $x 
+	if [ $1 -gt 1 ]; then 
+		uids=`awk -F: '($1 == n) { print $3 }' n=$2 /etc/passwd | xargs` 
+		echo "Duplicate User Name ($2): ${uids}" | tee -a ./audit_results.txt
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#---------------------------------------------------------------------------------------------------------------------------------------#
+
 # 6.2.19 Ensure no duplicate group names exist
+
+echo "############################################################################" >> ./audit_results.txt
+
+echo "[i] Ensuring no duplicate group names exist" | tee -a ./audit_results.txt
+echo "[i] Running script to verify: " | tee -a ./audit_results.txt
+
+cat /etc/group | cut -f1 -d":" | sort -n | uniq -c | while read x ; do 
+	[ -z "${x}" ] && break 
+	set - $x 
+	if [ $1 -gt 1 ]; then 
+		gids=`gawk -F: '($1 == n) { print $3 }' n=$2 /etc/group | xargs` 
+		echo "Duplicate Group Name ($2): ${gids}" | tee -a ./audit_results.txt
+	fi 
+done
+
+echo "[i] The script should NOT have returned any results.  If it does, they will need to be remediated" | tee -a ./audit_results.txt
+
+#########################################################################################################################################
+
+echo "[i] Audit script has now completed."
+
