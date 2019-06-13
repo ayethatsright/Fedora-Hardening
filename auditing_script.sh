@@ -13,7 +13,7 @@ if [[ $EUID -ne 0 ]]; then
 	exit
 fi
 
-echo "[i] Beginning the auditing process"
+echo "[i] Beginning the auditing process" | tee -a ./audit_results.txt
 
 
 #########################################################################################################################################
